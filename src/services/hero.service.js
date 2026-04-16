@@ -1,5 +1,14 @@
+import { headers } from "next/headers";
+
 export async function getHeroData() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/hero`, {
+  const host = (await headers()).get("host");
+
+  const protocol =
+    process.env.NODE_ENV === "development"
+      ? "http"
+      : "https";
+
+  const res = await fetch(`${protocol}://${host}/api/hero`, {
     cache: "no-store",
   });
 
