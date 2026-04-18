@@ -24,7 +24,7 @@ export default function Footer({ links }) {
             <div className="inline-flex items-center gap-3 border border-white/15 px-4 py-2.5">
               <span className="w-2 h-2 bg-white/30 inline-block" />
               <span className="text-[11px] tracking-[0.16em] uppercase text-white/30">
-                Est. 2018 · Ahmedabad, India
+                Est. XXXX · Vadodara, India
               </span>
             </div>
 
@@ -95,7 +95,7 @@ export default function Footer({ links }) {
 
             {[
               { label: "Email", val: "hello@tatvacollective.com" },
-              { label: "Phone", val: "+91 98765 43210" },
+              { label: "Phone", val: "+91 XXXX XXXX" },
               {
                 label: "Studio",
                 val: "Navrangpura, Ahmedabad\nGujarat 380009",

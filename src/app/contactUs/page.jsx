@@ -84,13 +84,13 @@ export default function ContactPage() {
 
             <div>
               <h4 className="font-semibold mb-1">Phone</h4>
-              <p className="text-[var(--muted)]">+91 98765 43210</p>
+              <p className="text-[var(--muted)]">+91 XXXXX XXXXX</p>
             </div>
 
             <div>
               <h4 className="font-semibold mb-1">Studio</h4>
               <p className="text-[var(--muted)]">
-                Ahmedabad, Gujarat, India
+                 Vadodara, Gujarat, India
               </p>
             </div>
           </div>
