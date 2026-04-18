@@ -8,7 +8,7 @@ export default function Footer({ links }) {
           <div className="sm:col-span-2 lg:col-span-1">
             {/* ONLY HEADING = CORMORANT */}
             <h2 className="font-cormorant text-[3rem] sm:text-[3.6rem] font-light leading-none tracking-widest text-[#e8e3da] mb-5">
-              Tatva
+              Tatvam
               <br />
               Collective
             </h2>

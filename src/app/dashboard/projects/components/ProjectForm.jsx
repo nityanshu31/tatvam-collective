@@ -2,45 +2,143 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import ImageUploader from "./ImageUploader";
 import GalleryUploader from "./GalleryUploader";
 import { uploadImage } from "../utils/uploadUtils";
 
-export default function ProjectForm({ project, onClose, onSuccess }) {
-  const [formData, setFormData] = useState({
-    title: project?.title || "",
-    location: project?.location || "",
-    year: project?.year || "",
-    area: project?.area || "",
-    type: project?.type || "Residential",
-    category: project?.category || "Contemporary",
-    status: project?.status || "Completed",
-    description: project?.description || "",
-    featured: project?.featured || false,
-    order: project?.order || 0,
-    image: project?.image || "",
-    imagePublicId: project?.imagePublicId || "",
-    gallery: project?.gallery || [],
-    galleryPublicIds: project?.galleryPublicIds || []
+// Custom Yup transformer for area with m²
+const areaWithUnit = yup
+  .string()
+  .required("Area is required")
+  .test("valid-area", "Please enter a valid number", (value) => {
+    if (!value) return false;
+    const numericValue = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+    return !isNaN(numericValue) && numericValue > 0 && numericValue <= 1000000;
+  })
+  .transform((value, originalValue) => {
+    // When getting from form, ensure it has m²
+    if (originalValue && !String(originalValue).includes('m²')) {
+      const num = parseFloat(originalValue);
+      return isNaN(num) ? originalValue : `${num} m²`;
+    }
+    return originalValue;
   });
 
+// Validation schema
+const projectSchema = yup.object().shape({
+  title: yup
+    .string()
+    .required("Title is required")
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must be less than 100 characters")
+    .trim(),
+  
+  location: yup
+    .string()
+    .required("Location is required")
+    .min(2, "Location must be at least 2 characters")
+    .max(100, "Location must be less than 100 characters")
+    .trim(),
+  
+  year: yup
+    .number()
+    .typeError("Please select a valid year")
+    .required("Year is required")
+    .min(1900, "Year must be 1900 or later")
+    .max(new Date().getFullYear(), `Year cannot be later than ${new Date().getFullYear()}`),
+  
+  area: areaWithUnit,
+  
+  type: yup
+    .string()
+    .default("Residential"),
+  
+  category: yup
+    .string()
+    .default("Contemporary"),
+  
+  status: yup
+    .string()
+    .default("Completed"),
+  
+  description: yup
+    .string()
+    .required("Description is required")
+    .min(20, "Description must be at least 20 characters")
+    .max(2000, "Description must be less than 2000 characters")
+    .trim(),
+  
+  order: yup
+    .number()
+    .typeError("Order must be a number")
+    .min(0, "Order must be 0 or greater")
+    .default(0),
+  
+  featured: yup
+    .boolean()
+    .default(false)
+});
+
+export default function ProjectForm({ project, onClose, onSuccess }) {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(project?.image || "");
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [galleryPreviews, setGalleryPreviews] = useState(project?.gallery || []);
   const [uploading, setUploading] = useState(false);
+  const [imageError, setImageError] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+  // Helper function to extract numeric value from area string
+  const extractAreaNumber = (areaValue) => {
+    if (!areaValue) return "";
+    // Convert to string if it's a number
+    const areaString = String(areaValue);
+    const match = areaString.match(/^([\d.]+)/);
+    return match ? match[1] : "";
+  };
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    formState: { errors, isSubmitting }
+  } = useForm({
+    resolver: yupResolver(projectSchema),
+    defaultValues: {
+      title: project?.title || "",
+      location: project?.location || "",
+      year: project?.year ? parseInt(project.year) : "",
+      area: project?.area ? String(project.area) : "",
+      type: project?.type || "Residential",
+      category: project?.category || "Contemporary",
+      status: project?.status || "Completed",
+      description: project?.description || "",
+      featured: project?.featured || false,
+      order: project?.order || 0
+    }
+  });
+
+  // Watch description length for character count
+  const descriptionValue = watch("description", "");
+  const descriptionLength = descriptionValue?.length || 0;
+
+  // Generate year options from 1900 to current year
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let year = currentYear; year >= 1900; year--) {
+      years.push(year);
+    }
+    return years;
   };
 
   const handleImageChange = (file, preview) => {
     setImageFile(file);
     setImagePreview(preview);
+    setImageError("");
   };
 
   const handleGalleryChange = (files, previews) => {
@@ -51,33 +149,22 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
   const handleRemoveGalleryImage = (index) => {
     setGalleryFiles(prev => prev.filter((_, i) => i !== index));
     setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => ({
-      ...prev,
-      gallery: prev.gallery.filter((_, i) => i !== index),
-      galleryPublicIds: prev.galleryPublicIds?.filter((_, i) => i !== index) || []
-    }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const onSubmit = async (data) => {
     try {
+      // Validate main image for new projects
+      if (!project && !imageFile) {
+        setImageError("Main image is required");
+        return;
+      }
+
       setUploading(true);
 
-      // Validation
-      if (!formData.title || !formData.location || !formData.description) {
-        throw new Error("Please fill in all required fields");
-      }
-
-      if (!project && !imageFile) {
-        throw new Error("Please select a main image");
-      }
-
-      let mainImageUrl = formData.image;
-      let mainImagePublicId = formData.imagePublicId;
-      let galleryUrls = [...formData.gallery];
-      let galleryPublicIds = [...formData.galleryPublicIds];
+      let mainImageUrl = project?.image || "";
+      let mainImagePublicId = project?.imagePublicId || "";
+      let galleryUrls = project?.gallery || [];
+      let galleryPublicIds = project?.galleryPublicIds || [];
 
       // Upload main image
       if (imageFile) {
@@ -95,8 +182,14 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
         }
       }
 
+      // Ensure area has m² suffix
+      const areaWithUnit = String(data.area).includes('m²') 
+        ? data.area 
+        : `${data.area} m²`;
+
       const projectData = {
-        ...formData,
+        ...data,
+        area: areaWithUnit, // Store with m² suffix
         image: mainImageUrl,
         imagePublicId: mainImagePublicId,
         gallery: galleryUrls,
@@ -115,10 +208,10 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
         body: JSON.stringify(projectData)
       });
 
-      const data = await res.json();
+      const responseData = await res.json();
 
-      if (!data.success) {
-        throw new Error(data.error || "Failed to save project");
+      if (!responseData.success) {
+        throw new Error(responseData.error || "Failed to save project");
       }
 
       alert(project ? "Project updated successfully!" : "Project created successfully!");
@@ -167,7 +260,7 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-6" noValidate>
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Title */}
@@ -177,13 +270,15 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  {...register("title")}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                    errors.title ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter project title"
-                  required
                 />
+                {errors.title && (
+                  <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                )}
               </div>
 
               {/* Location */}
@@ -193,13 +288,15 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                 </label>
                 <input
                   type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  {...register("location")}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                    errors.location ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="City, Country"
-                  required
                 />
+                {errors.location && (
+                  <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>
+                )}
               </div>
 
               {/* Year */}
@@ -207,40 +304,72 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Year <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="2024"
-                  required
-                />
+                <select
+                  {...register("year")}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                    errors.year ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select Year</option>
+                  {generateYearOptions().map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+                {errors.year && (
+                  <p className="mt-1 text-sm text-red-600">{errors.year.message}</p>
+                )}
               </div>
 
-              {/* Area */}
+              {/* Area with m² suffix - User only enters number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Area <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <Controller
                   name="area"
-                  value={formData.area}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                  placeholder="650 m²"
-                  required
+                  control={control}
+                  render={({ field }) => {
+                    const numericValue = extractAreaNumber(field.value);
+                    
+                    return (
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={numericValue}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Only allow numbers and decimal point
+                            const cleaned = value.replace(/[^0-9.]/g, '');
+                            // Prevent multiple decimal points
+                            const parts = cleaned.split('.');
+                            const sanitized = parts[0] + (parts.length > 1 ? '.' + parts.slice(1).join('') : '');
+                            
+                            // Update form value with m² suffix
+                            field.onChange(sanitized ? `${sanitized} m²` : '');
+                          }}
+                          onBlur={field.onBlur}
+                          className={`w-full px-4 py-2 pr-12 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                            errors.area ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          placeholder="Enter area"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
+                          m²
+                        </span>
+                      </div>
+                    );
+                  }}
                 />
+                {errors.area && (
+                  <p className="mt-1 text-sm text-red-600">{errors.area.message}</p>
+                )}
               </div>
 
               {/* Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
                 <select
-                  name="type"
-                  value={formData.type}
-                  onChange={handleChange}
+                  {...register("type")}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="Residential">Residential</option>
@@ -255,9 +384,7 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
+                  {...register("category")}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="Contemporary">Contemporary</option>
@@ -272,9 +399,7 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
+                  {...register("status")}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="Completed">Completed</option>
@@ -286,15 +411,28 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
               {/* Order */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Display Order</label>
-                <input
-                  type="number"
+                <Controller
                   name="order"
-                  value={formData.order}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                  min="0"
-                  placeholder="0"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="number"
+                      min="0"
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? 0 : parseInt(value));
+                      }}
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                        errors.order ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="0"
+                    />
+                  )}
                 />
+                {errors.order && (
+                  <p className="mt-1 text-sm text-red-600">{errors.order.message}</p>
+                )}
               </div>
 
               {/* Featured */}
@@ -302,9 +440,7 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    name="featured"
-                    checked={formData.featured}
-                    onChange={handleChange}
+                    {...register("featured")}
                     className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
                   />
                   <span className="ml-2 text-sm font-medium text-gray-700">Featured Project</span>
@@ -317,14 +453,22 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
+                  {...register("description")}
                   rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent resize-none"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent resize-none ${
+                    errors.description ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   placeholder="Enter project description..."
-                  required
                 />
+                <div className="flex justify-between mt-1">
+                  {errors.description ? (
+                    <p className="text-sm text-red-600">{errors.description.message}</p>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      {descriptionLength}/2000 characters
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Main Image Uploader */}
@@ -333,7 +477,11 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                   currentImage={imagePreview}
                   onImageChange={handleImageChange}
                   required={!project}
+                  error={imageError}
                 />
+                {imageError && (
+                  <p className="mt-1 text-sm text-red-600">{imageError}</p>
+                )}
               </div>
 
               {/* Gallery Uploader */}
@@ -351,7 +499,7 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
           <div className="sticky bottom-0 bg-white pt-6 mt-6 border-t flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
-              disabled={uploading}
+              disabled={uploading || isSubmitting}
               className="w-full sm:w-auto px-6 py-3 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {uploading ? (

@@ -1,4 +1,5 @@
 // app/dashboard/projects/components/ProjectTable.jsx
+import { Trash,Pencil } from 'lucide-react';
 export default function ProjectTable({ projects, onEdit, onDelete }) {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -48,7 +49,7 @@ export default function ProjectTable({ projects, onEdit, onDelete }) {
                       onClick={() => onEdit(project)}
                       className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
-                      Edit
+                      <Pencil/>
                     </button>
                     <button
                       onClick={() => {
@@ -57,7 +58,7 @@ export default function ProjectTable({ projects, onEdit, onDelete }) {
                       }}
                       className="px-3 py-1.5 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
-                      Delete
+                      <Trash/>
                     </button>
                   </div>
                 </td>
