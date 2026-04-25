@@ -22,7 +22,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata = {
-  title: "Tatva Collective",
+  title: "Tatvam Collective",
   description: "Architect Portfolio",
 };
 

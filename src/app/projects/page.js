@@ -12,7 +12,7 @@ const ProjectCard = ({ project, index, onClick }) => {
   const [rotateY, setRotateY] = useState(0);
   const [glareX, setGlareX] = useState(50);
   const [glareY, setGlareY] = useState(50);
-  const [isActive, setIsActive] = useState(false); // Changed from isHovered to isActive
+  const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const autoRotateInterval = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -51,9 +51,9 @@ const ProjectCard = ({ project, index, onClick }) => {
 
   const hasMultipleImages = allImages.length > 1;
 
-  // Auto-rotate images logic for both desktop and mobile
+  // Auto-rotate images on hover only (desktop only)
   useEffect(() => {
-    if (isActive && hasMultipleImages) {
+    if (!isMobile && isHovered && hasMultipleImages) {
       autoRotateInterval.current = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
       }, 2000);
@@ -61,7 +61,7 @@ const ProjectCard = ({ project, index, onClick }) => {
       if (autoRotateInterval.current) {
         clearInterval(autoRotateInterval.current);
       }
-      if (!isActive) {
+      if (!isHovered) {
         setCurrentImageIndex(0);
       }
     }
@@ -71,7 +71,7 @@ const ProjectCard = ({ project, index, onClick }) => {
         clearInterval(autoRotateInterval.current);
       }
     };
-  }, [isActive, hasMultipleImages, allImages.length]);
+  }, [isHovered, hasMultipleImages, allImages.length, isMobile]);
 
   const handleMouseMove = (e) => {
     if (!cardRef.current || isMobile) return;
@@ -101,26 +101,12 @@ const ProjectCard = ({ project, index, onClick }) => {
     setRotateY(0);
     setGlareX(50);
     setGlareY(50);
-    setIsActive(false);
+    setIsHovered(false);
   };
 
-  const handleInteractionStart = () => {
-    if (isMobile) {
-      // On mobile, tap to activate/deactivate
-      setIsActive(!isActive);
-    } else {
-      setIsActive(true);
-    }
+  const handleCardClick = () => {
+    onClick(project._id || project.id);
   };
-
-  const handleInteractionEnd = () => {
-    if (!isMobile) {
-      setIsActive(false);
-    }
-  };
-
-  // For mobile, show a subtle indicator that you can tap
-  const showTapHint = isMobile && !isActive && hasMultipleImages;
 
   return (
     <motion.div
@@ -129,19 +115,14 @@ const ProjectCard = ({ project, index, onClick }) => {
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.05 }}
       className="cursor-pointer h-full"
-      onClick={() => {
-        if (!isMobile) {
-          onClick(project._id || project.id);
-        }
-      }}
+      onClick={handleCardClick}
     >
       <div
         ref={cardRef}
         className="relative group h-full flex flex-col"
         onMouseMove={handleMouseMove}
-        onMouseEnter={() => !isMobile && setIsActive(true)}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
-        onTouchStart={isMobile ? handleInteractionStart : undefined}
         style={{
           transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
           transition: "transform 0.1s ease-out",
@@ -170,11 +151,9 @@ const ProjectCard = ({ project, index, onClick }) => {
             </motion.div>
           </AnimatePresence>
           
-          {/* Dot indicators */}
-          {hasMultipleImages && (
-            <div className={`absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 transition-opacity duration-300 ${
-              isActive ? 'opacity-100' : 'opacity-50'
-            }`}>
+          {/* Dot indicators - only on desktop when hovering */}
+          {!isMobile && hasMultipleImages && isHovered && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
               {allImages.map((_, idx) => (
                 <div
                   key={idx}
@@ -187,29 +166,15 @@ const ProjectCard = ({ project, index, onClick }) => {
               ))}
             </div>
           )}
-
-          {/* Tap to view gallery hint - mobile only */}
-          {showTapHint && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="text-center">
-                <svg className="w-8 h-8 text-white mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                </svg>
-                <span className="text-white text-xs bg-black/50 px-3 py-1 rounded-full">
-                  Tap to view gallery
-                </span>
-              </div>
-            </div>
-          )}
           
           {/* Overlay gradient */}
           <div 
             className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 pointer-events-none ${
-              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              isHovered && !isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           />
           
-          {/* Glare effect - disabled on mobile */}
+          {/* Glare effect - desktop only */}
           {!isMobile && (
             <div 
               className="absolute inset-0 opacity-0 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none"
@@ -219,20 +184,14 @@ const ProjectCard = ({ project, index, onClick }) => {
             />
           )}
           
-          {/* View project button - different behavior on mobile */}
+          {/* View project button */}
           <div 
             className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 pointer-events-none ${
-              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              isHovered && !isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isMobile && isActive) {
-                onClick(project._id || project.id);
-              }
-            }}
           >
             <span className="px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-full text-white text-sm uppercase tracking-wider">
-              {isMobile && isActive ? 'View Details →' : 'View Project'}
+              View Project
             </span>
           </div>
         </div>
@@ -241,7 +200,7 @@ const ProjectCard = ({ project, index, onClick }) => {
         <div className="mt-4 sm:mt-5 relative">
           <motion.h3 
             className="text-lg sm:text-xl lg:text-2xl font-semibold transition-colors duration-300 group-hover:text-[var(--accent)] line-clamp-1"
-            animate={{ x: isActive ? 8 : 0 }}
+            animate={{ x: isHovered && !isMobile ? 8 : 0 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
             {project.title}
@@ -257,7 +216,7 @@ const ProjectCard = ({ project, index, onClick }) => {
           <motion.div 
             className="h-[1px] bg-[var(--accent)] mt-3"
             initial={{ scaleX: 0 }}
-            animate={{ scaleX: isActive ? 1 : 0 }}
+            animate={{ scaleX: isHovered && !isMobile ? 1 : 0 }}
             transition={{ duration: 0.3 }}
             style={{ transformOrigin: "left" }}
           />
