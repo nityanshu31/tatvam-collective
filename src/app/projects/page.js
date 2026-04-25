@@ -1,7 +1,7 @@
 // app/projects/page.jsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectModal from "@/components/ProjectModal";
@@ -12,10 +12,69 @@ const ProjectCard = ({ project, index, onClick }) => {
   const [rotateY, setRotateY] = useState(0);
   const [glareX, setGlareX] = useState(50);
   const [glareY, setGlareY] = useState(50);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false); // Changed from isHovered to isActive
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const autoRotateInterval = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Get all images (main image + gallery) - NO DUPLICATES
+  const allImages = useMemo(() => {
+    const images = [];
+    const imageSet = new Set();
+    
+    if (project.image) {
+      images.push(project.image);
+      imageSet.add(project.image);
+    }
+    
+    if (project.gallery && Array.isArray(project.gallery)) {
+      project.gallery.forEach(img => {
+        if (!imageSet.has(img)) {
+          images.push(img);
+          imageSet.add(img);
+        }
+      });
+    }
+    
+    return images;
+  }, [project.image, project.gallery]);
+
+  const hasMultipleImages = allImages.length > 1;
+
+  // Auto-rotate images logic for both desktop and mobile
+  useEffect(() => {
+    if (isActive && hasMultipleImages) {
+      autoRotateInterval.current = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+      }, 2000);
+    } else {
+      if (autoRotateInterval.current) {
+        clearInterval(autoRotateInterval.current);
+      }
+      if (!isActive) {
+        setCurrentImageIndex(0);
+      }
+    }
+
+    return () => {
+      if (autoRotateInterval.current) {
+        clearInterval(autoRotateInterval.current);
+      }
+    };
+  }, [isActive, hasMultipleImages, allImages.length]);
 
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || isMobile) return;
     
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -37,12 +96,31 @@ const ProjectCard = ({ project, index, onClick }) => {
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     setRotateX(0);
     setRotateY(0);
     setGlareX(50);
     setGlareY(50);
-    setIsHovered(false);
+    setIsActive(false);
   };
+
+  const handleInteractionStart = () => {
+    if (isMobile) {
+      // On mobile, tap to activate/deactivate
+      setIsActive(!isActive);
+    } else {
+      setIsActive(true);
+    }
+  };
+
+  const handleInteractionEnd = () => {
+    if (!isMobile) {
+      setIsActive(false);
+    }
+  };
+
+  // For mobile, show a subtle indicator that you can tap
+  const showTapHint = isMobile && !isActive && hasMultipleImages;
 
   return (
     <motion.div
@@ -51,48 +129,110 @@ const ProjectCard = ({ project, index, onClick }) => {
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.05 }}
       className="cursor-pointer h-full"
-      onClick={() => onClick(project._id || project.id)}
+      onClick={() => {
+        if (!isMobile) {
+          onClick(project._id || project.id);
+        }
+      }}
     >
       <div
         ref={cardRef}
         className="relative group h-full flex flex-col"
         onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={() => !isMobile && setIsActive(true)}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={isMobile ? handleInteractionStart : undefined}
         style={{
           transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
           transition: "transform 0.1s ease-out",
         }}
       >
         {/* Image container */}
-        <div className="overflow-hidden rounded-2xl relative w-full aspect-[4/3]">
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            priority={index < 4}
-            unoptimized={true}
-          />
+        <div className="overflow-hidden rounded-2xl relative w-full aspect-[4/3] bg-[#f5f5f5]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="relative w-full h-full"
+            >
+              <Image
+                src={allImages[currentImageIndex]}
+                alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                priority={index < 4}
+                unoptimized={true}
+              />
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Dot indicators */}
+          {hasMultipleImages && (
+            <div className={`absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 transition-opacity duration-300 ${
+              isActive ? 'opacity-100' : 'opacity-50'
+            }`}>
+              {allImages.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`transition-all duration-500 rounded-full ${
+                    currentImageIndex === idx
+                      ? 'w-2 h-2 bg-white shadow-md'
+                      : 'w-1.5 h-1.5 bg-white/40'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Tap to view gallery hint - mobile only */}
+          {showTapHint && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="text-center">
+                <svg className="w-8 h-8 text-white mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                </svg>
+                <span className="text-white text-xs bg-black/50 px-3 py-1 rounded-full">
+                  Tap to view gallery
+                </span>
+              </div>
+            </div>
+          )}
           
           {/* Overlay gradient */}
           <div 
-            className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-500 pointer-events-none ${
+              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           />
           
-          {/* Glare effect */}
+          {/* Glare effect - disabled on mobile */}
+          {!isMobile && (
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none"
+              style={{
+                background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.8) 0%, transparent 60%)`,
+              }}
+            />
+          )}
+          
+          {/* View project button - different behavior on mobile */}
           <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.8) 0%, transparent 60%)`,
+            className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 pointer-events-none ${
+              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isMobile && isActive) {
+                onClick(project._id || project.id);
+              }
             }}
-          />
-          
-          {/* View project button */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          >
             <span className="px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-full text-white text-sm uppercase tracking-wider">
-              View Project
+              {isMobile && isActive ? 'View Details →' : 'View Project'}
             </span>
           </div>
         </div>
@@ -101,20 +241,23 @@ const ProjectCard = ({ project, index, onClick }) => {
         <div className="mt-4 sm:mt-5 relative">
           <motion.h3 
             className="text-lg sm:text-xl lg:text-2xl font-semibold transition-colors duration-300 group-hover:text-[var(--accent)] line-clamp-1"
-            animate={{ x: isHovered ? 8 : 0 }}
+            animate={{ x: isActive ? 8 : 0 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
             {project.title}
           </motion.h3>
           <p className="text-[var(--muted)] mt-1 text-xs sm:text-sm uppercase tracking-wider">
-            {project.location}
+            {project.location} | {project.year}
+          </p>
+          <p className="text-[var(--muted)] mt-0.5 text-xs">
+            {project.type} • {project.category}
           </p>
           
           {/* Animated underline */}
           <motion.div 
             className="h-[1px] bg-[var(--accent)] mt-3"
             initial={{ scaleX: 0 }}
-            animate={{ scaleX: isHovered ? 1 : 0 }}
+            animate={{ scaleX: isActive ? 1 : 0 }}
             transition={{ duration: 0.3 }}
             style={{ transformOrigin: "left" }}
           />
@@ -137,10 +280,156 @@ const ProjectCardSkeleton = () => (
   </div>
 );
 
+// Category Filter Component with Dropdown for mobile
+const CategoryFilter = ({ categories, activeCategory, onCategoryChange, projectCounts }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  const handleCategorySelect = (category) => {
+    onCategoryChange(category);
+    setIsDropdownOpen(false);
+  };
+
+  const allCategories = ['ALL', ...categories];
+
+  return (
+    <>
+      {/* Desktop View */}
+      <motion.div 
+        className={`sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[var(--border)] transition-shadow duration-300 ${
+          isScrolled ? 'shadow-md' : ''
+        } hidden md:block`}
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+          <div className="max-w-[1800px] mx-auto">
+            <div className="flex flex-wrap items-center gap-2 py-3 sm:py-4 overflow-x-auto scrollbar-hide">
+              {allCategories.map((category) => (
+                <motion.button
+                  key={category}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onCategoryChange(category)}
+                  className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                    activeCategory === category
+                      ? 'text-white'
+                      : 'text-[var(--black)] hover:text-[var(--accent)]'
+                  }`}
+                >
+                  {activeCategory === category && (
+                    <motion.span
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-[var(--black)] rounded-full"
+                      transition={{ type: "spring", duration: 0.5 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    {category === 'ALL' ? 'All Projects' : category}
+                    <span className="text-xs opacity-70">({projectCounts[category] || 0})</span>
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Mobile View - Dropdown Menu */}
+      <div className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[var(--border)] py-3">
+        <div className="w-full px-4">
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="flex items-center justify-between w-full px-5 py-3 bg-[var(--black)] rounded-xl text-white shadow-lg"
+            >
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-[var(--muted)] opacity-70">Filter by</span>
+                <span className="text-base font-semibold">
+                  {activeCategory === 'ALL' ? 'All Projects' : activeCategory}
+                </span>
+              </div>
+              <motion.div
+                animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </motion.div>
+            </button>
+
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-[var(--border)] overflow-hidden z-50"
+                >
+                  <div className="max-h-80 overflow-y-auto">
+                    {allCategories.map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => handleCategorySelect(category)}
+                        className={`w-full px-5 py-3 flex items-center justify-between transition-colors ${
+                          activeCategory === category
+                            ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
+                            : 'text-[var(--black)] hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="text-base font-medium">
+                          {category === 'ALL' ? 'All Projects' : category}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm ${activeCategory === category ? 'text-[var(--accent)]' : 'text-[var(--muted)]'}`}>
+                            ({projectCounts[category] || 0})
+                          </span>
+                          {activeCategory === category && (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 export default function ProjectsPage() {
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('ALL');
   const [stats, setStats] = useState({
     totalProjects: 0,
     citiesCount: 0,
@@ -168,8 +457,6 @@ export default function ProjectsPage() {
     }
   };
 
-  console.log("projects",projects)
-
   const fetchStats = async () => {
     try {
       const res = await fetch('/api/projects/stats');
@@ -185,6 +472,41 @@ export default function ProjectsPage() {
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
+  };
+
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set();
+    projects.forEach(project => {
+      if (project.category) {
+        uniqueCategories.add(project.category);
+      }
+    });
+    return Array.from(uniqueCategories).sort();
+  }, [projects]);
+
+  const projectCounts = useMemo(() => {
+    const counts = { ALL: projects.length };
+    categories.forEach(cat => {
+      counts[cat] = projects.filter(p => p.category === cat).length;
+    });
+    return counts;
+  }, [projects, categories]);
+
+  const filteredProjects = useMemo(() => {
+    if (activeCategory === 'ALL') {
+      return projects;
+    }
+    return projects.filter(project => project.category === activeCategory);
+  }, [projects, activeCategory]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
   };
 
   return (
@@ -261,22 +583,55 @@ export default function ProjectsPage() {
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 auto-rows-fr">
-              {loading ? (
-                [...Array(6)].map((_, i) => (
-                  <ProjectCardSkeleton key={i} />
-                ))
-              ) : (
-                projects.map((project, index) => (
-                  <ProjectCard 
-                    key={project._id || project.id}
-                    project={project} 
-                    index={index} 
-                    onClick={setSelectedProjectId}
-                  />
-                ))
-              )}
-            </div>
+            {!loading && categories.length > 0 && (
+              <CategoryFilter 
+                categories={categories}
+                activeCategory={activeCategory}
+                onCategoryChange={setActiveCategory}
+                projectCounts={projectCounts}
+              />
+            )}
+
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={activeCategory}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, y: 20 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 auto-rows-fr mt-8"
+              >
+                {loading ? (
+                  [...Array(6)].map((_, i) => (
+                    <ProjectCardSkeleton key={i} />
+                  ))
+                ) : filteredProjects.length > 0 ? (
+                  filteredProjects.map((project, index) => (
+                    <ProjectCard 
+                      key={project._id || project.id}
+                      project={project} 
+                      index={index} 
+                      onClick={setSelectedProjectId}
+                    />
+                  ))
+                ) : (
+                  <motion.div 
+                    className="col-span-full text-center py-20"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <p className="text-[var(--muted)] text-lg">No projects found in this category.</p>
+                    <button 
+                      onClick={() => setActiveCategory('ALL')}
+                      className="mt-4 text-[var(--accent)] hover:underline"
+                    >
+                      View all projects
+                    </button>
+                  </motion.div>
+                )}
+              </motion.div>
+            </AnimatePresence>
             
             <motion.div 
               className="mt-16 lg:mt-24 text-center"

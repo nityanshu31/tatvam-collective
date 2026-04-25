@@ -6,11 +6,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Footer from "./Footer";
 import { Menu, X, Home, FolderKanban, User, Mail } from "lucide-react";
+import Image from "next/image";
 
 export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   const links = [
     { name: "Home", href: "/", icon: Home },
     { name: "Projects", href: "/projects", icon: FolderKanban },
@@ -24,9 +25,9 @@ export default function LayoutWrapper({ children }) {
   }, [pathname]);
 
   // Routes that should NOT show header/footer
-  const noLayoutRoutes = ['/dashboard', '/adminLogin'];
-  const shouldHideLayout = noLayoutRoutes.some(route => 
-    pathname?.startsWith(route)
+  const noLayoutRoutes = ["/dashboard", "/adminLogin"];
+  const shouldHideLayout = noLayoutRoutes.some((route) =>
+    pathname?.startsWith(route),
   );
 
   // If it's a dashboard route, only render children
@@ -39,10 +40,20 @@ export default function LayoutWrapper({ children }) {
     <>
       {/* Header */}
       <header className="fixed top-0 left-0 w-full z-50 bg-(--white) shadow-sm">
-        <nav className="relative flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
+       <nav className="relative flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
           {/* Logo */}
-          <Link href="/" className="text-lg sm:text-xl font-semibold text-(--black)">
-            Tatvam Collective
+          <Link
+            href="/"
+            className="text-lg sm:text-xl font-semibold text-(--black)"
+          >
+            <Image
+              src="/logos/tatvam-logo-rectangle-noBg.png"
+              alt="Tatvam Logo"
+              width={120}
+              height={40}
+              // className="h-8 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Nav */}
@@ -100,9 +111,7 @@ export default function LayoutWrapper({ children }) {
       </header>
 
       {/* Main */}
-      <main className="flex-1 pt-15 sm:pt-17">
-        {children}
-      </main>
+      <main className="flex-1 pt-15 sm:pt-17">{children}</main>
 
       {/* Footer */}
       <Footer />
