@@ -119,13 +119,15 @@ const ProjectCard = ({ project, index, onClick }) => {
     >
       <div
         ref={cardRef}
-        className="relative group h-full flex flex-col"
+        className="relative group h-full flex flex-col rounded-2xl"
         onMouseMove={handleMouseMove}
         onMouseEnter={() => !isMobile && setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
         style={{
           transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-          transition: "transform 0.1s ease-out",
+          transition: "transform 0.2s ease-out",
+          transformStyle: "preserve-3d",
+          borderRadius: "1rem",
         }}
       >
         {/* Image container */}
@@ -177,7 +179,7 @@ const ProjectCard = ({ project, index, onClick }) => {
           {/* Glare effect - desktop only */}
           {!isMobile && (
             <div 
-              className="absolute inset-0 opacity-0 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none"
+              className="absolute inset-0 opacity-0 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none rounded-2xl"
               style={{
                 background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.8) 0%, transparent 60%)`,
               }}

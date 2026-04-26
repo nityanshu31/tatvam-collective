@@ -1,11 +1,43 @@
+
+
 import { Resend } from "resend";
+import { connectDB } from "@/lib/db";
+import Contact from "@/models/Contact";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function GET() {
+  try {
+    await connectDB();
+
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+
+    return Response.json({ success: true, contacts });
+  } catch (error) {
+    return Response.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
+
 
 export async function POST(req) {
   try {
     const { name, email, projectType, message } = await req.json();
 
+    // ✅ 1. Connect DB
+    await connectDB();
+
+    // ✅ 2. Save to MongoDB
+    await Contact.create({
+      name,
+      email,
+      projectType,
+      message,
+    });
+
+    // ✅ 3. Send Email (your existing code)
     await resend.emails.send({
       from: "onboarding@resend.dev",
       to: "nityanshuranawat.deuglo@gmail.com",
@@ -107,10 +139,13 @@ export async function POST(req) {
     });
 
     return Response.json({ success: true });
+
   } catch (error) {
+    console.error(error);
+
     return Response.json(
       { success: false, error: error.message },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

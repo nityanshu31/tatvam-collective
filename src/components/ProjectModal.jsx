@@ -1,7 +1,7 @@
 // components/ProjectModal.jsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -35,12 +35,38 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
 
+  // Get all images (main image + gallery) - NO DUPLICATES
+  const allImages = useMemo(() => {
+    if (!project) return [];
+    
+    const images = [];
+    const imageSet = new Set();
+    
+    // Add main image first
+    if (project.image) {
+      images.push(project.image);
+      imageSet.add(project.image);
+    }
+    
+    // Add gallery images without duplicates
+    if (project.gallery && Array.isArray(project.gallery)) {
+      project.gallery.forEach(img => {
+        if (!imageSet.has(img)) {
+          images.push(img);
+          imageSet.add(img);
+        }
+      });
+    }
+    
+    return images;
+  }, [project]);
+
   // Debug log
   useEffect(() => {
     console.log("Modal opened with projectId:", projectId);
     console.log("Found project:", project);
-    console.log("All projects:", projects);
-  }, [projectId, project, projects]);
+    console.log("All images:", allImages);
+  }, [projectId, project, allImages]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -52,6 +78,12 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
     };
   }, [project]);
 
+  // Reset image index when project changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+    setImageError(false);
+  }, [project]);
+
   if (!project) {
     console.error("Project not found for ID:", projectId);
     return null;
@@ -59,13 +91,13 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => 
-      prev === project.gallery.length - 1 ? 0 : prev + 1
+      prev === allImages.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => 
-      prev === 0 ? project.gallery.length - 1 : prev - 1
+      prev === 0 ? allImages.length - 1 : prev - 1
     );
   };
 
@@ -118,7 +150,7 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
           <div className="relative w-full lg:w-3/5 bg-[#f5f5f5]">
             <div className="relative aspect-[4/3] lg:aspect-auto lg:h-full">
               <Image
-                src={imageError ? fallbackImage : (project.gallery?.[currentImageIndex] || project.image)}
+                src={imageError ? fallbackImage : (allImages[currentImageIndex] || project.image)}
                 alt={`${project.title} - Image ${currentImageIndex + 1}`}
                 fill
                 className="object-cover"
@@ -131,7 +163,7 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
               
               {/* Gallery Navigation */}
-              {project.gallery && project.gallery.length > 1 && (
+              {allImages.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
@@ -148,7 +180,7 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                   
                   {/* Image counter */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-[var(--black)] text-sm shadow-lg">
-                    {currentImageIndex + 1} / {project.gallery.length}
+                    {currentImageIndex + 1} / {allImages.length}
                   </div>
                 </>
               )}
@@ -199,12 +231,12 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                 About the Project
               </h3>
               <p className="text-[var(--muted)] leading-relaxed mb-6">
-                {project.description}
+                {project.description || "No description available."}
               </p>
             </motion.div>
 
             {/* Thumbnail Gallery */}
-            {project.gallery && project.gallery.length > 1 && (
+            {allImages.length > 1 && (
               <motion.div
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -215,7 +247,7 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                   Gallery
                 </h3>
                 <div className="grid grid-cols-3 gap-2">
-                  {project.gallery.map((img, idx) => (
+                  {allImages.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentImageIndex(idx)}
