@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^5.2.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",

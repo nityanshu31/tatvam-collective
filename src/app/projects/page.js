@@ -249,7 +249,7 @@ const CategoryFilter = ({ categories, activeCategory, onCategoryChange, projectC
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -281,18 +281,18 @@ const CategoryFilter = ({ categories, activeCategory, onCategoryChange, projectC
         } hidden md:block`}
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
       >
         <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="max-w-[1800px] mx-auto">
-            <div className="flex flex-wrap items-center gap-2 py-3 sm:py-4 overflow-x-auto scrollbar-hide">
+            <div className="flex flex-wrap items-center gap-2 py-2.5 overflow-x-auto scrollbar-hide">
               {allCategories.map((category) => (
                 <motion.button
                   key={category}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => onCategoryChange(category)}
-                  className={`relative px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                  className={`relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
                     activeCategory === category
                       ? 'text-white'
                       : 'text-[var(--black)] hover:text-[var(--accent)]'
@@ -317,7 +317,7 @@ const CategoryFilter = ({ categories, activeCategory, onCategoryChange, projectC
       </motion.div>
 
       {/* Mobile View - Dropdown Menu */}
-      <div className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[var(--border)] py-3">
+      <div className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[var(--border)] py-2.5">
         <div className="w-full px-4">
           <div className="relative" ref={dropdownRef}>
             <button
@@ -473,18 +473,18 @@ export default function ProjectsPage() {
   return (
     <>
       <section className="bg-[var(--white)] text-[var(--black)] min-h-screen">
-        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-16 sm:py-20 lg:py-24">
+        <div className="w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 sm:py-10 lg:py-12">
           <div className="max-w-[1800px] mx-auto">
             <motion.div 
-              className="mb-12 lg:mb-20"
+              className="mb-8 lg:mb-10"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
-              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 lg:gap-8">
+              <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 lg:gap-6">
                 <div className="flex-1">
                   <motion.p 
-                    className="text-[var(--accent)] uppercase tracking-[0.3em] text-xs sm:text-sm mb-3"
+                    className="text-[var(--accent)] uppercase tracking-[0.3em] text-xs sm:text-sm mb-2"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 }}
@@ -493,7 +493,7 @@ export default function ProjectsPage() {
                   </motion.p>
 
                   <motion.h1 
-                    className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold mb-4 lg:mb-6 leading-[1.1]"
+                    className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-semibold mb-2 lg:mb-3 leading-[1.15]"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
@@ -504,7 +504,7 @@ export default function ProjectsPage() {
                   </motion.h1>
 
                   <motion.p 
-                    className="text-[var(--muted)] max-w-2xl text-base sm:text-lg lg:text-xl"
+                    className="text-[var(--muted)] max-w-2xl text-sm sm:text-base lg:text-lg"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
@@ -521,24 +521,24 @@ export default function ProjectsPage() {
                   transition={{ delay: 0.25 }}
                 >
                   <div className="text-right">
-                    <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-[var(--accent)]">
+                    <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-[var(--accent)]">
                       {loading ? '-' : stats.totalProjects}
                     </p>
-                    <p className="text-xs sm:text-sm text-[var(--muted)] uppercase tracking-wider mt-1">Projects</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wider mt-0.5">Projects</p>
                   </div>
-                  <div className="w-[1px] h-12 lg:h-16 bg-[var(--muted)]/20" />
+                  <div className="w-[1px] h-8 lg:h-10 bg-[var(--muted)]/20" />
                   <div className="text-right">
-                    <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-[var(--accent)]">
+                    <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-[var(--accent)]">
                       {loading ? '-' : stats.citiesCount}
                     </p>
-                    <p className="text-xs sm:text-sm text-[var(--muted)] uppercase tracking-wider mt-1">Cities</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wider mt-0.5">Cities</p>
                   </div>
-                  <div className="w-[1px] h-12 lg:h-16 bg-[var(--muted)]/20" />
+                  <div className="w-[1px] h-8 lg:h-10 bg-[var(--muted)]/20" />
                   <div className="text-right">
-                    <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-[var(--accent)]">
+                    <p className="text-2xl sm:text-3xl lg:text-4xl font-light text-[var(--accent)]">
                       {stats.yearsExperience}
                     </p>
-                    <p className="text-xs sm:text-sm text-[var(--muted)] uppercase tracking-wider mt-1">Years</p>
+                    <p className="text-xs text-[var(--muted)] uppercase tracking-wider mt-0.5">Years</p>
                   </div>
                 </motion.div>
               </div>
@@ -560,7 +560,7 @@ export default function ProjectsPage() {
                 initial="hidden"
                 animate="visible"
                 exit={{ opacity: 0, y: 20 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 auto-rows-fr mt-8"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 xl:gap-8 auto-rows-fr mt-6 lg:mt-8"
               >
                 {loading ? (
                   [...Array(6)].map((_, i) => (
@@ -577,7 +577,7 @@ export default function ProjectsPage() {
                   ))
                 ) : (
                   <motion.div 
-                    className="col-span-full text-center py-20"
+                    className="col-span-full text-center py-12"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
@@ -585,7 +585,7 @@ export default function ProjectsPage() {
                     <p className="text-[var(--muted)] text-lg">No projects found in this category.</p>
                     <button 
                       onClick={() => setActiveCategory('ALL')}
-                      className="mt-4 text-[var(--accent)] hover:underline"
+                      className="mt-3 text-[var(--accent)] hover:underline"
                     >
                       View all projects
                     </button>
@@ -595,12 +595,12 @@ export default function ProjectsPage() {
             </AnimatePresence>
             
             <motion.div 
-              className="mt-16 lg:mt-24 text-center"
+              className="mt-12 lg:mt-16 text-center"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
             >
-              <p className="text-[var(--muted)] text-sm uppercase tracking-[0.3em]">
+              <p className="text-[var(--muted)] text-xs uppercase tracking-[0.3em]">
                 — More Coming Soon —
               </p>
             </motion.div>
