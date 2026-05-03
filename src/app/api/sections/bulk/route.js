@@ -3,40 +3,34 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Section from "@/models/Section";
 
-// POST /api/sections/bulk - Bulk operations
 export async function POST(request) {
   try {
     await connectDB();
     const { operations } = await request.json();
-    
+
+    console.log("Bulk operations:", operations);
+
     const results = [];
-    
+
     for (const op of operations) {
       if (op.action === "updateOrder") {
         const section = await Section.findOneAndUpdate(
           { id: op.id },
-          { order: op.order, updatedAt: Date.now() },
+          { order: Number(op.order), updatedAt: new Date() },
           { new: true }
         );
-        results.push(section);
+        results.push(section || { id: op.id, notFound: true });
       } else if (op.action === "delete") {
-        await Section.findOneAndDelete({ id: op.id });
-        results.push({ id: op.id, deleted: true });
-      } else if (op.action === "toggleVisibility") {
-        const section = await Section.findOneAndUpdate(
-          { id: op.id },
-          { defaultVisible: op.value, updatedAt: Date.now() },
-          { new: true }
-        );
-        results.push(section);
+        const deleted = await Section.findOneAndDelete({ id: op.id });
+        results.push(deleted ? { id: op.id, deleted: true } : { id: op.id, notFound: true });
       }
     }
-    
+
     return NextResponse.json({
       success: true,
       results
     });
-    
+
   } catch (error) {
     console.error("Error in bulk operation:", error);
     return NextResponse.json(

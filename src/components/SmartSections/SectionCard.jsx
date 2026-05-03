@@ -49,53 +49,63 @@ const SectionCard = ({ section, onClick }) => {
         return "";
     }
   };
-
+console.log(section)
   const renderMedia = () => {
-    if (!media) return null;
+  if (!media) return null;
 
-    const { type: mediaType, images, videoUrl, autoplay = false, interval = 3000 } = media;
+  const { type: mediaType, images, videoUrl, autoplay = false, interval = 3000 } = media;
 
-    if (mediaType === "carousel" && images && images.length > 0) {
-      return (
-        <MediaCarousel
-          images={images}
-          autoplay={autoplay}
-          interval={interval}
-          isHovered={isHovered}
+  if (mediaType === "carousel" && images && images.length > 0) {
+    // Extract URLs from image objects
+    const imageUrls = images
+      .filter(img => img?.url) // Filter out any images without URLs
+      .map(img => img.url);     // Extract just the URL strings
+    
+    if (imageUrls.length === 0) return null;
+    
+    return (
+      <MediaCarousel
+        images={imageUrls}  // Pass the array of URL strings
+        autoplay={autoplay}
+        interval={interval}
+        isHovered={isHovered}
+      />
+    );
+  }
+
+  if (mediaType === "image" && images && images[0]) {
+    // Handle both object and string formats for single image
+    const imageUrl = images[0].url || images[0];
+    
+    return (
+      <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          unoptimized={true}
         />
-      );
-    }
+      </div>
+    );
+  }
 
-    if (mediaType === "image" && images && images[0]) {
-      return (
-        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-          <Image
-            src={images[0]}
-            alt={title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            unoptimized={true}
-          />
-        </div>
-      );
-    }
+  if (mediaType === "video" && videoUrl) {
+    return (
+      <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
+        <video
+          src={videoUrl}
+          autoPlay={autoplay}
+          loop
+          muted
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
 
-    if (mediaType === "video" && videoUrl) {
-      return (
-        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-          <video
-            src={videoUrl}
-            autoPlay={autoplay}
-            loop
-            muted
-            className="w-full h-full object-cover"
-          />
-        </div>
-      );
-    }
-
-    return null;
-  };
+  return null;
+};
 
   const renderStats = () => {
     if (!stats) return null;

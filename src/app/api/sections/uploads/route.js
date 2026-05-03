@@ -49,8 +49,19 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const publicId = searchParams.get("publicId");
-    
+    // Try query first
+    let publicId = searchParams.get("publicId");
+
+    // If not in query, try JSON body (some clients send JSON in DELETE)
+    if (!publicId) {
+      try {
+        const body = await request.json().catch(() => null);
+        publicId = body?.publicId || body?.public_id;
+      } catch (e) {
+        // ignore
+      }
+    }
+
     if (!publicId) {
       return NextResponse.json(
         { success: false, error: "No publicId provided" },

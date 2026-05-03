@@ -9,7 +9,8 @@ import {
   FolderKanban, 
   MessageSquare,
   LogOut,
-  X
+  X,
+  Proportions
 } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
@@ -24,6 +25,7 @@ export default function DashboardLayout({ children }) {
     { label: "Hero Section", href: "/dashboard/hero", icon: Image },
     { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
     { label: "Contact Queries", href: "/dashboard/queries", icon: MessageSquare },
+    { label: "Home Page Sections", href: "/dashboard/sections", icon: Proportions },
   ];
 
   // ✅ Page titles (scalable)

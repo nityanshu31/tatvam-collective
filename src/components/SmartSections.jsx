@@ -9,8 +9,8 @@ import SectionControls from "./SmartSections/SectionControls";
 const SmartSections = ({ 
   sections = [], 
   allowUserToggle = true,
-  defaultVisibleSections = "all", // "all" or array of IDs
-  layoutType = "auto", // "auto", "equal", "priority"
+  defaultVisibleSections = "all",
+  layoutType = "auto",
   className = "",
   onSectionVisibilityChange = null,
   onSectionClick = null
@@ -18,37 +18,41 @@ const SmartSections = ({
   const [visibleSections, setVisibleSections] = useState([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize visible sections
+  // Filter sections that are marked as visible (defaultVisible === true) and active
+  const visibleOnlySections = useMemo(() => {
+    // Only show sections where defaultVisible is true and isActive is true
+    return sections.filter(section => section.defaultVisible === true && section.isActive === true);
+  }, [sections]);
+
+  // Initialize visible sections (only from visibleOnlySections)
   useEffect(() => {
-    if (!isInitialized && sections.length > 0) {
+    if (!isInitialized && visibleOnlySections.length > 0) {
       let initialVisible;
       if (defaultVisibleSections === "all") {
-        initialVisible = sections.map(s => s.id);
+        initialVisible = visibleOnlySections.map(s => s.id);
       } else if (Array.isArray(defaultVisibleSections)) {
         initialVisible = defaultVisibleSections;
       } else {
-        initialVisible = sections.filter(s => s.defaultVisible !== false).map(s => s.id);
+        initialVisible = visibleOnlySections.filter(s => s.defaultVisible !== false).map(s => s.id);
       }
       setVisibleSections(initialVisible);
       setIsInitialized(true);
     }
-  }, [sections, defaultVisibleSections, isInitialized]);
+  }, [visibleOnlySections, defaultVisibleSections, isInitialized]);
 
-  // Get visible section objects
+  // Get visible section objects (only from visibleOnlySections)
   const visibleSectionObjects = useMemo(() => {
-    return sections.filter(section => visibleSections.includes(section.id));
-  }, [sections, visibleSections]);
+    return visibleOnlySections.filter(section => visibleSections.includes(section.id));
+  }, [visibleOnlySections, visibleSections]);
 
-  // Calculate column class based on visible sections count
   const getColumnClass = () => {
     const count = visibleSectionObjects.length;
-    if (count === 1) return "grid-cols-1 max-w-4xl mx-auto";
+    if (count === 1) return "grid-cols-1  mx-auto";
     if (count === 2) return "grid-cols-1 md:grid-cols-2";
     if (count >= 3) return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
     return "grid-cols-1";
   };
 
-  // Get priority-based width class (for non-equal widths)
   const getWidthClass = (section, totalCount) => {
     if (layoutType !== "priority") return "col-span-1";
     
@@ -78,20 +82,28 @@ const SmartSections = ({
     }
   };
 
-  if (sections.length === 0) {
-    return (
-      <div className="text-center py-12 bg-gray-50 rounded-2xl">
-        <p className="text-[var(--muted)]">No sections available</p>
-      </div>
-    );
+  // Debug logging (only in development)
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("SmartSections - Total sections from API:", sections.length);
+      console.log("SmartSections - Visible only sections:", visibleOnlySections.length);
+      console.log("SmartSections - Sections with defaultVisible false:", sections.filter(s => s.defaultVisible === false).length);
+      console.log("SmartSections - Visible section objects:", visibleSectionObjects.length);
+    }
+  }, [sections, visibleOnlySections, visibleSectionObjects]);
+
+  // RETURN NULL IF NO SECTIONS OR NO VISIBLE SECTIONS
+  // This ensures nothing is rendered on the homepage
+  if (sections.length === 0 || visibleOnlySections.length === 0 || visibleSectionObjects.length === 0) {
+    return null;
   }
 
   return (
     <div className={`w-full ${className}`}>
       {/* Controls - Allow users to toggle sections */}
-      {allowUserToggle && sections.length > 1 && (
+      {allowUserToggle && visibleOnlySections.length > 1 && (
         <SectionControls
-          sections={sections}
+          sections={visibleOnlySections}
           visibleSections={visibleSections}
           onToggle={handleToggleSection}
         />
@@ -105,7 +117,7 @@ const SmartSections = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className={`grid ${getColumnClass()} gap-6 lg:gap-8`}
+          className={`grid ${getColumnClass()} gap-6 lg:gap-8 auto-rows-fr`}
         >
           {visibleSectionObjects.map((section, index) => (
             <motion.div
@@ -114,7 +126,7 @@ const SmartSections = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={getWidthClass(section, visibleSectionObjects.length)}
+              className={`${getWidthClass(section, visibleSectionObjects.length)} h-full`}
             >
               <SectionCard
                 section={section}
@@ -124,17 +136,6 @@ const SmartSections = ({
           ))}
         </motion.div>
       </AnimatePresence>
-
-      {/* Empty state when all sections hidden */}
-      {visibleSectionObjects.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-12"
-        >
-          <p className="text-[var(--muted)]">All sections are hidden. Toggle above to show content.</p>
-        </motion.div>
-      )}
     </div>
   );
 };
