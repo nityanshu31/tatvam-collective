@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import Blog from "@/models/Blog";
+import { connectDB } from "@/lib/db";
 
 async function getBlogs() {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/blogs`,
+    `/api/blogs`,
     {
       cache: "no-store",
     }
@@ -15,9 +17,11 @@ async function getBlogs() {
 }
 
 export default async function BlogPage() {
-  const data = await getBlogs();
-  const blogs = data.blogs || [];
+ await connectDB();
 
+const blogs = await Blog.find().sort({
+  createdAt: -1,
+});
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}

@@ -2,10 +2,13 @@
 
 import { notFound } from "next/navigation";
 import InteractiveBlog from "./InteractiveBlog";
+import Blog from "@/models/Blog";
+
+import { connectDB } from "@/lib/db";
 
 async function getBlog(slug) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/blogs/${slug}`,
+    `/api/blogs/${slug}`,
     {
       cache: "no-store",
     }
@@ -20,12 +23,18 @@ async function getBlog(slug) {
 
 export default async function BlogDetails({ params }) {
   const { slug } = await params;
-  const data = await getBlog(slug);
-  const blog = data?.blog;
+    await connectDB();
 
+  const blog = await Blog.findOne({
+    slug,
+  });
   if (!blog) {
     notFound();
   }
 
-  return <InteractiveBlog blog={blog} />;
+  const plainBlog = JSON.parse(
+  JSON.stringify(blog)
+);
+
+  return <InteractiveBlog blog={plainBlog} />;
 }
