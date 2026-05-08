@@ -359,3 +359,4 @@ const SectionList = ({ sections, loading, onEdit, onDelete, onToggleVisibility, 
 };
 
 export default SectionList;
+

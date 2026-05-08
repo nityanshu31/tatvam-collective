@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Footer from "./Footer";
-import { Menu, X, Home, FolderKanban, User, Mail } from "lucide-react";
+import { Menu, X, Home, FolderKanban, User, Mail ,BookOpen } from "lucide-react";
 import Image from "next/image";
 
 export default function LayoutWrapper({ children }) {
@@ -15,8 +15,9 @@ export default function LayoutWrapper({ children }) {
   const links = [
     { name: "Home", href: "/", icon: Home },
     { name: "Projects", href: "/projects", icon: FolderKanban },
+    {name:"Blogs" , href:"/blog" , icon:BookOpen},
     { name: "About", href: "/about", icon: User },
-    { name: "Contact", href: "/contactUs", icon: Mail },
+    { name: "Contact", href: "/contactUs", icon: Mail }
   ];
 
   // Auto-close mobile menu on route change
