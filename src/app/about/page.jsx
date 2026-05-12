@@ -21,13 +21,13 @@ const mockData = {
     quote:
       "Every space holds a Tatva — an intrinsic essence that defines its purpose, experience, and identity.",
     description:
-      "At Tatvam Collective, design is approached as a thoughtful synthesis of space, function, material, and human experience. Rather than viewing architecture as a mere physical outcome, we see it as a layered process of inquiry and expression — where ideas are carefully analyzed, articulated, and translated into meaningful built environments.",
+      "At Tatvam Collective, design is a deliberate synthesis of space, function, material, and human experience — approached not as a physical outcome, but as a layered process of inquiry, expression, and meaning. Every idea is thoughtfully articulated and translated into built environments that endure.",
   },
   studio: {
     tagline: "The Studio",
     title: "Led by a duo of architects",
     description:
-      "The studio delivers context-driven solutions that balance aesthetic clarity with technical precision. Each project is treated as a cohesive journey — from concept to completion — guided by disciplined processes, integrated consultancy, and a commitment to excellence in execution.",
+      "The studio delivers context-driven solutions that balance aesthetic clarity with technical precision. Each project is treated as a cohesive journey — from concept to completion — guided by purposeful processes, integrated consultancy, and an unwavering commitment to meaningful execution.",
     stats: [
       { value: "50+", label: "Projects Delivered" },
       { value: "8+", label: "Years of Excellence" },
@@ -36,26 +36,26 @@ const mockData = {
     ],
     testimonial: {
       quote:
-        "We aim to craft spaces that resonate with their users and contribute meaningfully to the built environment — not just as structures, but as living expressions of purpose.",
-      author: "— Founders, Tatvam Collective",
+        "We aim to craft spaces that resonate with the people who inhabit them and contribute meaningfully to the built environment — not just as structures, but as living expressions of purpose.",
+      author: "— Founding Principals, Tattvam Collective",
     },
   },
   workScope: {
     sectors: {
-      title: "SECTORS",
+      title: "Fields of Practice",
       items: [
         "Residential Architecture",
-        "Institutional Design",
+        "Commercial Architecture",
+        "Institutional & Educational Design",
+        "Healthcare Design",
+        "Interior Architecture",
         "Urban Planning",
-        "Interior Design",
         "Construction Consulting",
-        "Commercial Spaces",
-        "Hospitality",
-        "Landscape Design",
+        "Hospitality Design",
       ],
     },
     approach: {
-      title: "APPROACH",
+      title: "How We Work",
       items: [
         "Context-driven solutions",
         "Aesthetic clarity",
@@ -63,14 +63,14 @@ const mockData = {
         "Integrated consultancy",
         "Concept-to-key delivery",
         "Sustainable practices",
-        "User-centric design",
-        "Innovative materials",
+        "Human-centric design",
+        "Thoughtful materiality",
       ],
     },
     commitment: {
-      title: "COMMITMENT",
+      title: "Studio Ethos",
       description:
-        "Seamless 'concept-to-key' experience — ensuring clarity, accountability, and integrity at every stage of the project, from first sketch to final handover.",
+        "Seamless concept-to-key experience — built on clarity, accountability, and integrity at every stage, from first sketch to final realisation.",
     },
   },
   founders: {
@@ -496,54 +496,6 @@ export default function AboutPage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-[#111111] text-white py-20 relative overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 0.1 }}
-          transition={{ duration: 1 }}
-          className="absolute inset-0"
-        >
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-[#C6A77D] blur-[150px]" />
-        </motion.div>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <motion.div
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 0.5, type: "spring" }}
-            className="text-[#C6A77D] text-4xl mb-4 inline-block"
-          >
-            ✦
-          </motion.div>
-          <FadeInUp>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              Ready to craft your{" "}
-              <span className="text-[#C6A77D]">Tatva</span>?
-            </h2>
-            <p className="text-[#6B7280] text-lg mb-10 max-w-2xl mx-auto">
-              {mockData.cta.subtitle}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {mockData.cta.buttons.map((btn, idx) => (
-                <motion.button
-                  key={idx}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-8 py-3 font-semibold rounded-full transition-all duration-300 ${
-                    btn.primary
-                      ? "bg-[#C6A77D] text-[#111111] hover:bg-opacity-90"
-                      : "border border-[#C6A77D] text-[#C6A77D] hover:bg-[#C6A77D] hover:text-[#111111]"
-                  }`}
-                >
-                  {btn.label}
-                </motion.button>
-              ))}
-            </div>
-          </FadeInUp>
         </div>
       </section>
     </main>

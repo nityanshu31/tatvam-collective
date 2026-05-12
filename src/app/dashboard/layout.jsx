@@ -10,7 +10,8 @@ import {
   MessageSquare,
   LogOut,
   X,
-  Proportions
+  Proportions,
+  NotebookPen 
 } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
@@ -26,6 +27,7 @@ export default function DashboardLayout({ children }) {
     { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
     { label: "Contact Queries", href: "/dashboard/queries", icon: MessageSquare },
     { label: "Home Page Sections", href: "/dashboard/sections", icon: Proportions },
+    { label: "Blogs", href: "/dashboard/blogs", icon: NotebookPen }
   ];
 
   // ✅ Page titles (scalable)

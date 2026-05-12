@@ -9,23 +9,28 @@ import ImageUploader from "./ImageUploader";
 import GalleryUploader from "./GalleryUploader";
 import { uploadImage } from "../utils/uploadUtils";
 
-// Custom Yup transformer for area with m²
-const areaWithUnit = yup
-  .string()
-  .required("Area is required")
-  .test("valid-area", "Please enter a valid number", (value) => {
-    if (!value) return false;
-    const numericValue = parseFloat(String(value).replace(/[^0-9.]/g, ''));
-    return !isNaN(numericValue) && numericValue > 0 && numericValue <= 1000000;
-  })
-  .transform((value, originalValue) => {
-    // When getting from form, ensure it has m²
-    if (originalValue && !String(originalValue).includes('m²')) {
-      const num = parseFloat(originalValue);
-      return isNaN(num) ? originalValue : `${num} m²`;
-    }
-    return originalValue;
-  });
+// Area unit options
+const AREA_UNITS = [
+  { value: "m²", label: "Square Meters (m²)" },
+  { value: "ft²", label: "Square Feet (ft²)" },
+  { value: "sq ft", label: "Square Feet (sq ft)" }
+];
+
+// Custom Yup transformer for area with unit
+const createAreaSchema = () => {
+  return yup
+    .string()
+    .required("Area is required")
+    .test("valid-area", "Please enter a valid number", (value) => {
+      if (!value) return false;
+      const numericValue = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+      return !isNaN(numericValue) && numericValue > 0 && numericValue <= 1000000;
+    })
+    .transform((value, originalValue) => {
+      // Preserve the value with unit as stored
+      return originalValue;
+    });
+};
 
 // Validation schema
 const projectSchema = yup.object().shape({
@@ -50,7 +55,8 @@ const projectSchema = yup.object().shape({
     .min(1900, "Year must be 1900 or later")
     .max(new Date().getFullYear(), `Year cannot be later than ${new Date().getFullYear()}`),
   
-  area: areaWithUnit,
+  area: createAreaSchema(),
+  areaUnit: yup.string().default("m²"),
   
   type: yup
     .string()
@@ -90,14 +96,25 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
   const [uploading, setUploading] = useState(false);
   const [imageError, setImageError] = useState("");
 
-  // Helper function to extract numeric value from area string
-  const extractAreaNumber = (areaValue) => {
-    if (!areaValue) return "";
-    // Convert to string if it's a number
-    const areaString = String(areaValue);
-    const match = areaString.match(/^([\d.]+)/);
-    return match ? match[1] : "";
+  // Helper function to extract numeric value and unit from area string
+  const parseAreaValue = (areaString) => {
+    if (!areaString) return { numericValue: "", unit: "m²" };
+    
+    // Try to match number and unit pattern
+    const match = String(areaString).match(/^([\d.]+)\s*([^\d].*)?$/);
+    if (match) {
+      const numericValue = match[1];
+      const unit = match[2] || "m²";
+      // Check if unit is valid, otherwise default to m²
+      const validUnit = AREA_UNITS.some(u => u.value === unit) ? unit : "m²";
+      return { numericValue, unit: validUnit };
+    }
+    
+    return { numericValue: "", unit: "m²" };
   };
+
+  // Parse initial area value if editing
+  const initialArea = parseAreaValue(project?.area || "");
 
   const {
     register,
@@ -111,7 +128,8 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
       title: project?.title || "",
       location: project?.location || "",
       year: project?.year ? parseInt(project.year) : "",
-      area: project?.area ? String(project.area) : "",
+      area: initialArea.numericValue,
+      areaUnit: initialArea.unit,
       type: project?.type || "Residential",
       category: project?.category || "Contemporary",
       status: project?.status || "Completed",
@@ -121,9 +139,11 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
     }
   });
 
-  // Watch description length for character count
+  // Watch values for real-time updates
   const descriptionValue = watch("description", "");
   const descriptionLength = descriptionValue?.length || 0;
+  const areaValue = watch("area", "");
+  const areaUnit = watch("areaUnit", "m²");
 
   // Generate year options from 1900 to current year
   const generateYearOptions = () => {
@@ -182,14 +202,22 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
         }
       }
 
-      // Ensure area has m² suffix
-      const areaWithUnit = String(data.area).includes('m²') 
-        ? data.area 
-        : `${data.area} m²`;
+      // Combine area value with selected unit
+      const areaWithUnit = data.area && data.areaUnit 
+        ? `${data.area} ${data.areaUnit}`
+        : "";
 
       const projectData = {
-        ...data,
-        area: areaWithUnit, // Store with m² suffix
+        title: data.title,
+        location: data.location,
+        year: data.year,
+        area: areaWithUnit,
+        type: data.type,
+        category: data.category,
+        status: data.status,
+        description: data.description,
+        featured: data.featured,
+        order: data.order,
         image: mainImageUrl,
         imagePublicId: mainImagePublicId,
         gallery: galleryUrls,
@@ -320,22 +348,21 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                 )}
               </div>
 
-              {/* Area with m² suffix - User only enters number */}
+              {/* Area with Unit Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Area <span className="text-red-500">*</span>
                 </label>
-                <Controller
-                  name="area"
-                  control={control}
-                  render={({ field }) => {
-                    const numericValue = extractAreaNumber(field.value);
-                    
-                    return (
-                      <div className="relative">
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Controller
+                      name="area"
+                      control={control}
+                      render={({ field }) => (
                         <input
                           type="text"
-                          value={numericValue}
+                          {...field}
+                          value={field.value || ""}
                           onChange={(e) => {
                             const value = e.target.value;
                             // Only allow numbers and decimal point
@@ -343,25 +370,43 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                             // Prevent multiple decimal points
                             const parts = cleaned.split('.');
                             const sanitized = parts[0] + (parts.length > 1 ? '.' + parts.slice(1).join('') : '');
-                            
-                            // Update form value with m² suffix
-                            field.onChange(sanitized ? `${sanitized} m²` : '');
+                            field.onChange(sanitized);
                           }}
-                          onBlur={field.onBlur}
-                          className={`w-full px-4 py-2 pr-12 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-black focus:border-transparent ${
                             errors.area ? 'border-red-500' : 'border-gray-300'
                           }`}
-                          placeholder="Enter area"
+                          placeholder="Enter area value"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
-                          m²
-                        </span>
-                      </div>
-                    );
-                  }}
-                />
+                      )}
+                    />
+                  </div>
+                  <div className="w-40">
+                    <Controller
+                      name="areaUnit"
+                      control={control}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                        >
+                          {AREA_UNITS.map(unit => (
+                            <option key={unit.value} value={unit.value}>
+                              {unit.label}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                  </div>
+                </div>
                 {errors.area && (
                   <p className="mt-1 text-sm text-red-600">{errors.area.message}</p>
+                )}
+                {/* Preview of formatted area */}
+                {areaValue && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Will be saved as: {areaValue} {areaUnit}
+                  </p>
                 )}
               </div>
 

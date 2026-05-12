@@ -37,75 +37,65 @@ const SectionCard = ({ section, onClick }) => {
 
   const getTypeStyles = () => {
     switch (type) {
-      case "notification":
-        return "border-l-4 border-l-[var(--accent)]";
-      case "hiring":
-        return "bg-gradient-to-br from-[var(--white)] to-[var(--accent)]/5";
-      case "promotion":
-        return "border-2 border-[var(--accent)]/20";
-      case "dashboard":
-        return "shadow-lg";
       default:
         return "";
     }
   };
-console.log(section)
+
   const renderMedia = () => {
-  if (!media) return null;
+    if (!media) return null;
 
-  const { type: mediaType, images, videoUrl, autoplay = false, interval = 3000 } = media;
+    const { type: mediaType, images, videoUrl, autoplay = false, interval = 3000 } = media;
 
-  if (mediaType === "carousel" && images && images.length > 0) {
-    // Extract URLs from image objects
-    const imageUrls = images
-      .filter(img => img?.url) // Filter out any images without URLs
-      .map(img => img.url);     // Extract just the URL strings
-    
-    if (imageUrls.length === 0) return null;
-    
-    return (
-      <MediaCarousel
-        images={imageUrls}  // Pass the array of URL strings
-        autoplay={autoplay}
-        interval={interval}
-        isHovered={isHovered}
-      />
-    );
-  }
-
-  if (mediaType === "image" && images && images[0]) {
-    // Handle both object and string formats for single image
-    const imageUrl = images[0].url || images[0];
-    
-    return (
-      <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-        <Image
-          src={imageUrl}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          unoptimized={true}
+    if (mediaType === "carousel" && images && images.length > 0) {
+      const imageUrls = images
+        .filter(img => img?.url)
+        .map(img => img.url);
+      
+      if (imageUrls.length === 0) return null;
+      
+      return (
+        <MediaCarousel
+          images={imageUrls}
+          autoplay={autoplay}
+          interval={interval}
+          isHovered={isHovered}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  if (mediaType === "video" && videoUrl) {
-    return (
-      <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-        <video
-          src={videoUrl}
-          autoPlay={autoplay}
-          loop
-          muted
-          className="w-full h-full object-cover"
-        />
-      </div>
-    );
-  }
+    if (mediaType === "image" && images && images[0]) {
+      const imageUrl = images[0].url || images[0];
+      
+      return (
+        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            unoptimized={true}
+          />
+        </div>
+      );
+    }
 
-  return null;
-};
+    if (mediaType === "video" && videoUrl) {
+      return (
+        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
+          <video
+            src={videoUrl}
+            autoPlay={autoplay}
+            loop
+            muted
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   const renderStats = () => {
     if (!stats) return null;
@@ -153,13 +143,33 @@ console.log(section)
       ref={cardRef}
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
-      className={`group relative bg-[var(--white)] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full ${getTypeStyles()}`}
+      className={`
+        group 
+        relative 
+        bg-[var(--white)] 
+        rounded-2xl 
+        overflow-hidden 
+        shadow-sm 
+        hover:shadow-xl 
+        transition-all 
+        duration-300 
+        cursor-pointer 
+        flex 
+        flex-col 
+        h-full
+        
+        /* UNIFORM BORDER FOR ALL CARDS */
+        border 
+        border-[var(--border)] 
+        hover:border-[var(--accent)]
+        
+        ${getTypeStyles()}
+      `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onClick && onClick(section)}
       style={{
         backgroundColor: backgroundColor,
-        borderColor: `${accentColor}20`
       }}
     >
       {/* Media Section - Fixed height */}
@@ -228,7 +238,6 @@ console.log(section)
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle collapse logic in parent
               }}
               className="p-1.5 bg-white/80 backdrop-blur-sm rounded-full shadow-sm"
             >

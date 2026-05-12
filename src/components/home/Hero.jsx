@@ -81,7 +81,7 @@ export default function Hero({
             borderRadius: "6px",
           }}
         >
-          Tatvam Collective
+          Tattvam Collective
         </p>
 
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-6">

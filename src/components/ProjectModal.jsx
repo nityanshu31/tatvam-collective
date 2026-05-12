@@ -38,6 +38,41 @@ const MinusIcon = () => (
   </svg>
 );
 
+// Component to render description with proper paragraph formatting
+const FormattedDescription = ({ description, className = "" }) => {
+  if (!description) return <p className={className}>No description available.</p>;
+  
+  // Split by double newlines for paragraphs
+  const paragraphs = description.split(/\n\s*\n/);
+  
+  return (
+    <div className={`space-y-4 ${className}`}>
+      {paragraphs.map((paragraph, idx) => {
+        // Handle single line breaks within paragraph
+        const lines = paragraph.split('\n');
+        
+        if (lines.length === 1) {
+          return (
+            <p key={idx} className="leading-relaxed">
+              {lines[0]}
+            </p>
+          );
+        }
+        
+        return (
+          <div key={idx} className="space-y-2">
+            {lines.map((line, lineIdx) => (
+              <p key={lineIdx} className="leading-relaxed">
+                {line}
+              </p>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const ProjectModal = ({ projectId, projects, onClose }) => {
   const router = useRouter();
   const [isInfoOpen, setIsInfoOpen] = useState(false);
@@ -269,9 +304,8 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
               <h3 className="text-sm uppercase tracking-wider text-[var(--muted)] mb-3">
                 About the Project
               </h3>
-              <p className="text-[var(--muted)] leading-relaxed text-sm">
-                {project.description || "No description available."}
-              </p>
+              {/* Updated description with paragraph formatting */}
+              <FormattedDescription description={project.description} />
             </div>
           </div>
         </div>
@@ -311,14 +345,6 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
 
         {/* Info Button - Bottom Right */}
         <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
-          <motion.span
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: isInfoOpen ? 0 : 1, x: isInfoOpen ? 20 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-xs font-medium text-[var(--black)] bg-white/80 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm"
-          >
-            {isInfoOpen ? "Close" : "Info"}
-          </motion.span>
           <motion.button
             onClick={() => setIsInfoOpen(!isInfoOpen)}
             className="p-2 bg-[var(--accent)]/80 backdrop-blur-sm rounded-full text-white hover:bg-[var(--accent)] transition-all duration-300 shadow-md"
@@ -440,9 +466,8 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                   <h3 className="text-base uppercase tracking-wider text-[var(--muted)] mb-3">
                     About the Project
                   </h3>
-                  <p className="text-[var(--muted)] leading-relaxed text-base">
-                    {project.description || "No description available."}
-                  </p>
+                  {/* Updated description with paragraph formatting */}
+                  <FormattedDescription description={project.description} className="text-[var(--muted)]" />
                 </div>
 
                 {/* Thumbnail Gallery */}

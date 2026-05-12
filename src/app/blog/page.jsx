@@ -32,7 +32,7 @@ const blogs = await Blog.find().sort({
               Our Blog
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-[#E5E7EB] leading-relaxed">
-              Discover insights, stories, and perspectives from our community
+              Insights, perspectives, and stories from our practice
             </p>
             <div className="w-20 h-1 bg-[#C6A77D] mx-auto mt-6 sm:mt-8"></div>
           </div>

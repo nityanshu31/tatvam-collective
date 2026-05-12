@@ -37,8 +37,7 @@ export default function ContactPage() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success("Mail Sent Successfully")
-        
+        toast.success("Mail Sent Successfully");
 
         setFormData({
           name: "",
@@ -67,13 +66,13 @@ export default function ContactPage() {
           </p>
 
           <h1 className="text-4xl sm:text-5xl font-semibold leading-tight mb-6">
-            Let’s Design Something Timeless Together
+            Let's Craft Your Tatva Together
           </h1>
 
           <p className="text-[var(--muted)] text-lg leading-relaxed max-w-xl mb-10">
-            Whether you're planning a residential masterpiece, commercial
-            landmark, or interior transformation — we’d love to hear about your
-            vision.
+           Whether you're envisioning a residential masterpiece, 
+           commercial landmark, or a crafted interior environment — 
+           share your vision with us.
           </p>
 
           <div className="space-y-5">
@@ -89,9 +88,7 @@ export default function ContactPage() {
 
             <div>
               <h4 className="font-semibold mb-1">Studio</h4>
-              <p className="text-[var(--muted)]">
-                 Vadodara, Gujarat, India
-              </p>
+              <p className="text-[var(--muted)]">Vadodara, Gujarat, India</p>
             </div>
           </div>
         </div>
@@ -145,9 +142,7 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Message
-              </label>
+              <label className="block text-sm font-medium mb-2">Message</label>
               <textarea
                 rows="5"
                 name="message"

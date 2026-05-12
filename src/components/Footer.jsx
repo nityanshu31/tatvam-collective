@@ -8,15 +8,16 @@ export default function Footer({ links }) {
           <div className="sm:col-span-2 lg:col-span-1">
             {/* ONLY HEADING = CORMORANT */}
             <h2 className="font-cormorant text-[3rem] sm:text-[3.6rem] font-light leading-none tracking-widest text-[#e8e3da] mb-5">
-              Tatvam
+              Tattvam
               <br />
               Collective
             </h2>
 
             {/* DEFAULT FONT (bigger text) */}
             <p className="text-[#e8e3da]/60 text-[15px] leading-[1.8] max-w-70">
-              Designing timeless architectural experiences through thoughtful
-              spaces and modern aesthetics.
+              Manifesting the essence of 
+thoughtful design through 
+architectural expression.
             </p>
 
             <div className="w-10 h-px bg-white/25 my-6" />
@@ -70,11 +71,11 @@ export default function Footer({ links }) {
 
             <div className="flex flex-col gap-4">
               {[
-                "Residential",
-                "Commercial",
-                "Interior Design",
-                "Urban Planning",
-                "Consultation",
+                "Architecture & Interior Design",
+                "BIM Consultancy & Visualization",
+                "Tendering & Liaising",
+                "Project Management",
+                "Urban & City Planning",
               ].map((item) => (
                 <a
                   key={item}

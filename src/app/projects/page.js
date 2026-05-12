@@ -482,24 +482,16 @@ export default function ProjectsPage() {
             >
               <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 lg:gap-6">
                 <div className="flex-1">
-                  <motion.p 
-                    className="text-[var(--accent)] uppercase tracking-[0.3em] text-xs sm:text-sm mb-2"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    Portfolio
-                  </motion.p>
-
+                  
                   <motion.h1 
                     className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-semibold mb-2 lg:mb-3 leading-[1.15]"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
                   >
-                    Selected
+                    Curated
                     <br />
-                    Projects
+                    Works
                   </motion.h1>
 
                   <motion.p 
