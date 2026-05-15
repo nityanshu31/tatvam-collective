@@ -12,7 +12,7 @@ const mockData = {
     establishedYear: "2025",
     recognizedYear: "2017",
     title: "About Us",
-    subtitle: "— Tatvam Collective",
+    subtitle: " TATTVAM COLLECTIVE",
     description:
       "Multidisciplinary design and consulting practice based in Vadodara, working across architecture, interior design, urban planning, and construction.",
   },
@@ -240,9 +240,9 @@ export default function AboutPage() {
             </div>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-8">
               {mockData.hero.title}
-              <span className="block text-[#C6A77D] mt-2">
-                {mockData.hero.subtitle}
-              </span>
+             <span className="font-para-regular block text-[#C6A77D] mt-2 tracking-[0.15em] ">
+  {mockData.hero.subtitle}
+</span>
             </h1>
             <div className="w-20 h-0.5 bg-[#C6A77D] mb-8" />
             <p className="text-lg md:text-xl text-[#6B7280] leading-relaxed">

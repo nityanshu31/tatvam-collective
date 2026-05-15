@@ -72,7 +72,7 @@ export default function Hero({
 
       <div className="relative z-10 h-full flex flex-col justify-center px-6 sm:px-10 lg:px-20 text-white max-w-5xl">
         <p
-          className="uppercase tracking-[0.25em] mb-4"
+          className="font-para-regular uppercase tracking-[0.25em] mb-4"
           style={{
             color: "var(--accent)",
             fontSize: "18px",
@@ -81,7 +81,7 @@ export default function Hero({
             borderRadius: "6px",
           }}
         >
-          Tattvam Collective
+          TATTVAM COLLECTIVE
         </p>
 
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-6">

@@ -1,4 +1,13 @@
+import Link from "next/link";
+
 export default function Footer({ links }) {
+  const navLinks = [
+  { name: "Home", href: "/" },
+  { name: "Projects", href: "/projects" },
+  { name: "Blog", href: "/blog" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contactUs" },
+];
   return (
     <footer className="bg-[#0f0e0c] text-[#e8e3da] px-5 sm:px-8 lg:px-10 pt-20 pb-10">
       <div className="max-w-7xl mx-auto">
@@ -7,17 +16,16 @@ export default function Footer({ links }) {
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
             {/* ONLY HEADING = CORMORANT */}
-            <h2 className="font-cormorant text-[3rem] sm:text-[3.6rem] font-light leading-none tracking-widest text-[#e8e3da] mb-5">
-              Tattvam
+            <h2 className="font-para-regular text-[3rem] sm:text-[3.6rem] font-light leading-none tracking-widest text-[#e8e3da] mb-5">
+              TATTVAM
               <br />
-              Collective
+              COLLECTIVE
             </h2>
 
             {/* DEFAULT FONT (bigger text) */}
             <p className="text-[#e8e3da]/60 text-[15px] leading-[1.8] max-w-70">
-              Manifesting the essence of 
-thoughtful design through 
-architectural expression.
+              Manifesting the essence of thoughtful design through architectural
+              expression.
             </p>
 
             <div className="w-10 h-px bg-white/25 my-6" />
@@ -48,19 +56,17 @@ architectural expression.
               Navigation
             </p>
 
-            <div className="flex flex-col gap-4">
-              {["Home", "Projects", "Studio", "About", "Contact"].map(
-                (item) => (
-                  <a
-                    key={item}
-                    href="#"
-                    className="text-[15px] text-white/70 hover:text-white transition-colors"
-                  >
-                    {item}
-                  </a>
-                ),
-              )}
-            </div>
+           <div className="flex flex-col gap-4">
+  {navLinks.map((item) => (
+    <Link
+      key={item.name}
+      href={item.href}
+      className="text-[15px] text-white/70 hover:text-white transition-colors"
+    >
+      {item.name}
+    </Link>
+  ))}
+</div>
           </div>
 
           {/* Services */}

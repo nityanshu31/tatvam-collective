@@ -4,6 +4,27 @@
   font-family: var(--font-cormorant), serif;
 }
 
+@font-face {
+  font-family: "para-regular";
+  src: url("/fonts/para-regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "AbadiMT-Light";
+  src: url("/fonts/AbadiMT-Light.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-para-regular {
+  font-family: "para-regular", sans-serif;
+}
+.font-abadiLight {
+  font-family: "AbadiMT-Light", sans-serif;
+}
+
+
 
 :root {
   /* Premium Rich Black
