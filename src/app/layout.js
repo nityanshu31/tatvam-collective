@@ -28,7 +28,7 @@ export const metadata = {
 };
 
 const myFont = localFont({
-  src: "../../public/fonts/AbadiMT-light.woff2",
+  src: "../fonts/AbadiMT-light.woff2",
  
 })
 
