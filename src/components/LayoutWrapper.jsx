@@ -47,8 +47,8 @@ export default function LayoutWrapper({ children }) {
             className="text-lg sm:text-xl font-semibold text-(--black) transition-transform duration-200 hover:scale-105 active:scale-95"
           >
             <Image
-              src="/logos/tatvam-logo-rectangle-noBg.png"
-              alt="Tatvam Logo"
+              src="/logos/Tatvam-Rectangle.png"
+              alt="Tattvam Logo"
               width={120}
               height={40}
               className="transition-opacity duration-200 hover:opacity-90"

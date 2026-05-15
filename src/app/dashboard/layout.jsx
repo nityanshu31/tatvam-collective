@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }) {
 
   // ✅ Scalable navigation config
   const navItems = [
-    { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Welcome", href: "/dashboard", icon: LayoutDashboard },
     { label: "Hero Section", href: "/dashboard/hero", icon: Image },
     { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
     { label: "Contact Queries", href: "/dashboard/queries", icon: MessageSquare },

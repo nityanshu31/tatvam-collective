@@ -172,7 +172,7 @@ export default function AdminBlogs() {
       return;
     }
     
-    const url = editingBlog ? `/api/blogs/manage/${editingBlog._id}` : "/api/blogs/manage";
+    const url = editingBlog ? `/api/blogs/manage/${editingBlog._id}` : "/api/blogs";
     const method = editingBlog ? "PUT" : "POST";
     
     try {
