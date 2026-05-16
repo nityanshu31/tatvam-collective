@@ -13,7 +13,8 @@ import { uploadImage } from "../utils/uploadUtils";
 const AREA_UNITS = [
   { value: "m²", label: "Square Meters (m²)" },
   { value: "ft²", label: "Square Feet (ft²)" },
-  { value: "sq ft", label: "Square Feet (sq ft)" }
+  { value: "acres", label: "Acres" },
+ 
 ];
 
 // Custom Yup transformer for area with unit
@@ -419,9 +420,15 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                 >
                   <option value="Residential">Residential</option>
                   <option value="Commercial">Commercial</option>
+                  <option value="Institutional">Institutional</option>
                   <option value="Hospitality">Hospitality</option>
                   <option value="Interior">Interior</option>
                   <option value="Industrial">Industrial</option>
+                  <option value="Health Care">Health Care</option>
+                  <option value="PMC / Construction">PMC / Construction</option>
+                  <option value="Furnishing">Furnishing</option>
+                  <option value="City and Urban Planning">City and Urban Planning</option>
+                  <option value="Design Curated">Design Curated</option>
                 </select>
               </div>
 
@@ -433,10 +440,12 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
                   <option value="Contemporary">Contemporary</option>
+                  <option value="Conceptual">Conceptual</option>
+                  <option value="Design Curated">Design Curated</option>
                   <option value="Modern">Modern</option>
                   <option value="Minimalist">Minimalist</option>
                   <option value="Traditional">Traditional</option>
-                  <option value="Industrial">Industrial</option>
+                  <option value="Vernacular">Vernacular</option>
                 </select>
               </div>
 

@@ -11,7 +11,8 @@ import {
   LogOut,
   X,
   Proportions,
-  NotebookPen 
+  NotebookPen ,
+  UserPen
 } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
@@ -27,7 +28,8 @@ export default function DashboardLayout({ children }) {
     { label: "Projects", href: "/dashboard/projects", icon: FolderKanban },
     { label: "Contact Queries", href: "/dashboard/queries", icon: MessageSquare },
     { label: "Home Page Sections", href: "/dashboard/sections", icon: Proportions },
-    { label: "Blogs", href: "/dashboard/blogs", icon: NotebookPen }
+    { label: "Blogs", href: "/dashboard/blogs", icon: NotebookPen },
+    {label:"AboutUs Page" , href:"/dashboard/about" , icon: UserPen},
   ];
 
   // ✅ Page titles (scalable)
@@ -147,7 +149,7 @@ export default function DashboardLayout({ children }) {
         {/* Logo and Close Button */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold tracking-tight">Tatvam</h2>
+            <h2 className="text-xl font-semibold tracking-tight">Tattvam</h2>
             <p className="text-sm opacity-60 mt-1">Dashboard</p>
           </div>
           

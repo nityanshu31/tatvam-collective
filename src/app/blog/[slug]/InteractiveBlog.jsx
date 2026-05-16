@@ -161,9 +161,6 @@ export default function InteractiveBlog({ blog }) {
                   <div className="mb-6 lg:mb-8">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="w-8 h-px bg-[#C6A77D]"></div>
-                      <span className="text-xs uppercase tracking-wider text-[#6B7280] font-medium">
-                        Section {index + 1}
-                      </span>
                     </div>
                     <h2 className="text-3xl lg:text-4xl font-bold text-[#111111] leading-tight tracking-tight">
                       {section.heading}

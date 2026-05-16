@@ -85,7 +85,7 @@ export default function Footer({ links }) {
               ].map((item) => (
                 <a
                   key={item}
-                  href="#"
+                 
                   className="text-[15px] text-white/70 hover:text-white transition-colors"
                 >
                   {item}
@@ -105,7 +105,7 @@ export default function Footer({ links }) {
               { label: "Phone", val: "+91 XXXX XXXX" },
               {
                 label: "Studio",
-                val: "Navrangpura, Ahmedabad\nGujarat 380009",
+                val: "Navrangpura, Vadodara\nGujarat 380009",
               },
             ].map(({ label, val }) => (
               <div key={label} className="mb-6">

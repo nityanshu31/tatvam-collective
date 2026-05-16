@@ -26,12 +26,32 @@ const ProjectSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['Residential', 'Commercial', 'Hospitality', 'Interior', 'Industrial'],
+    enum: [
+    "Residential",
+    "Commercial",
+    "Institutional",
+    "Hospitality",
+    "Interior",
+    "Industrial",
+    "Health Care",
+    "PMC / Construction",
+    "Furnishing",
+    "City and Urban Planning",
+    "Design Curated"
+  ],
     default: 'Residential'
   },
   category: {
     type: String,
-    enum: ['Contemporary', 'Modern', 'Minimalist', 'Traditional', 'Industrial'],
+    enum: [
+    "Contemporary",
+    "Conceptual",
+    "Design Curated",
+    "Modern",
+    "Minimalist",
+    "Traditional",
+    "Vernacular"
+  ],
     default: 'Contemporary'
   },
   status: {
