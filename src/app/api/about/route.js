@@ -29,9 +29,23 @@ export async function PUT(req) {
 
     const body = await req.json();
 
+    // Find existing document
+    const existing = await AboutPage.findOne();
+
+    // Merge nested visibility safely
+    const mergedData = {
+      ...(existing?.toObject() || {}),
+      ...body,
+
+      visibility: {
+        ...(existing?.visibility || {}),
+        ...(body?.visibility || {}),
+      },
+    };
+
     const updated = await AboutPage.findOneAndUpdate(
       {},
-      body,
+      mergedData,
       {
         new: true,
         upsert: true,
