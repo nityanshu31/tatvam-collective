@@ -30,7 +30,7 @@ export async function GET() {
         quote:
           "Every space holds a Tatva — an intrinsic essence that defines its purpose, experience, and identity.",
         description:
-          "At Tatvam Collective, design is a deliberate synthesis of space, function, material, and human experience.",
+          "At Tattvam Collective, design is a deliberate synthesis of space, function, material, and human experience.",
       },
 
       studio: {
@@ -39,9 +39,15 @@ export async function GET() {
         description:
           "The studio delivers context-driven solutions that balance aesthetic clarity with technical precision.",
 
+  // fixed / primary years of experience field
+  yearsExperience: "8+",
+
         stats: [
           { value: "50+", label: "Projects Delivered" },
           { value: "8+", label: "Years of Excellence" },
+          // Keep a fixed yearsExperience field as well so frontend
+          // can rely on a single primary source for years value.
+          
           { value: "Pan-India", label: "Presence" },
           { value: "24/7", label: "Client Support" },
         ],
@@ -101,6 +107,7 @@ export async function GET() {
               linkedin: "",
               email: "",
               twitter: "",
+              instagram: "",
             },
 
             achievements: [

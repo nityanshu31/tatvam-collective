@@ -53,7 +53,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md border border-[var(--border)] rounded-2xl p-8 shadow-sm bg-[var(--white)]">
         <div className="mb-8 text-center">
           <p className="text-[var(--accent)] uppercase tracking-[0.2em] text-sm mb-2">
-            Tatvam Collective
+            Tattvam Collective
           </p>
 
           <h1 className="text-3xl font-semibold text-[var(--black)]">

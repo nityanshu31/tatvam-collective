@@ -1,28 +1,49 @@
 import Link from "next/link";
 
+import {
+  InstagramLogoIcon,
+  LinkedInLogoIcon,
+} from "@radix-ui/react-icons";
+
+import { Brush } from "lucide-react";
+
 export default function Footer({ links }) {
   const navLinks = [
-  { name: "Home", href: "/" },
-  { name: "Projects", href: "/projects" },
-  { name: "Blog", href: "/blog" },
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contactUs" },
-];
+    { name: "Home", href: "/" },
+    { name: "Projects", href: "/projects" },
+    { name: "Blog", href: "/blog" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contactUs" },
+  ];
+
+  const socialLinks = [
+    {
+      name: "Instagram",
+      icon: InstagramLogoIcon,
+      link: "https://www.instagram.com/tatvam_collective",
+    },
+    {
+      name: "LinkedIn",
+      icon: LinkedInLogoIcon,
+      link: "#",
+    },
+   
+
+   
+  ];
+
   return (
     <footer className="bg-[#0f0e0c] text-[#e8e3da] px-5 sm:px-8 lg:px-10 pt-20 pb-10">
       <div className="max-w-7xl mx-auto">
-        {/* Main Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.2fr] gap-14 pb-16 border-b border-white/10">
           {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
-            {/* ONLY HEADING = CORMORANT */}
             <h2 className="font-para-regular text-[3rem] sm:text-[3.6rem] font-light leading-none tracking-widest text-[#e8e3da] mb-5">
-              TATTVAM
+              Tattvam
               <br />
-              COLLECTIVE
+              Collective
             </h2>
 
-            {/* DEFAULT FONT (bigger text) */}
             <p className="text-[#e8e3da]/60 text-[15px] leading-[1.8] max-w-70">
               Manifesting the essence of thoughtful design through architectural
               expression.
@@ -32,21 +53,43 @@ export default function Footer({ links }) {
 
             <div className="inline-flex items-center gap-3 border border-white/15 px-4 py-2.5">
               <span className="w-2 h-2 bg-white/30 inline-block" />
+
               <span className="text-[11px] tracking-[0.16em] uppercase text-white/30">
-                Est. XXXX · Vadodara, India
+                Est. 2017 · Vadodara, India
               </span>
             </div>
 
+            {/* SOCIAL ICONS */}
             <div className="flex gap-4 mt-6">
-              {["Ig", "Ln", "Pt", "Bh"].map((s) => (
-                <a
-                  key={s}
-                  href="#"
-                  className="w-9.5 h-9.5 border border-white/20 flex items-center justify-center text-[13px] text-white/50 hover:border-white/70 hover:text-white transition-all duration-300"
-                >
-                  {s}
-                </a>
-              ))}
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+
+                return (
+                  <a
+                    key={social.name}
+                    href={social.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={social.name}
+                    className="
+                      w-10 h-10
+                      border border-white/15
+                      flex items-center justify-center
+                      text-white/45
+                      hover:text-white
+                      hover:border-white/60
+                      hover:bg-white/[0.03]
+                      transition-all duration-300
+                    "
+                  >
+                    {social.lucide ? (
+                      <Icon size={17} strokeWidth={1.7} />
+                    ) : (
+                      <Icon className="w-[17px] h-[17px]" />
+                    )}
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -56,17 +99,17 @@ export default function Footer({ links }) {
               Navigation
             </p>
 
-           <div className="flex flex-col gap-4">
-  {navLinks.map((item) => (
-    <Link
-      key={item.name}
-      href={item.href}
-      className="text-[15px] text-white/70 hover:text-white transition-colors"
-    >
-      {item.name}
-    </Link>
-  ))}
-</div>
+            <div className="flex flex-col gap-4">
+              {navLinks.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-[15px] text-white/70 hover:text-white transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Services */}
@@ -85,7 +128,6 @@ export default function Footer({ links }) {
               ].map((item) => (
                 <a
                   key={item}
-                 
                   className="text-[15px] text-white/70 hover:text-white transition-colors"
                 >
                   {item}
@@ -101,8 +143,14 @@ export default function Footer({ links }) {
             </p>
 
             {[
-              { label: "Email", val: "hello@tatvacollective.com" },
-              { label: "Phone", val: "+91 XXXX XXXX" },
+              {
+                label: "Email",
+                val: "hello@tatvacollective.com",
+              },
+              {
+                label: "Phone",
+                val: "+91 XXXX XXXX",
+              },
               {
                 label: "Studio",
                 val: "Navrangpura, Vadodara\nGujarat 380009",
@@ -112,6 +160,7 @@ export default function Footer({ links }) {
                 <span className="block text-[11px] tracking-[0.18em] uppercase text-white/35 mb-1">
                   {label}
                 </span>
+
                 <span className="text-[15px] text-white/65 whitespace-pre-line">
                   {val}
                 </span>
@@ -128,6 +177,7 @@ export default function Footer({ links }) {
                 placeholder="Your email"
                 className="flex-1 min-w-0 bg-white/5 border border-white/15 text-[#e8e3da] text-[14px] px-4 py-3 placeholder:text-white/25 focus:outline-none focus:border-white/40"
               />
+
               <button className="bg-[#e8e3da] text-[#0f0e0c] text-[12px] tracking-[0.15em] uppercase px-5 py-3 font-medium hover:bg-white transition">
                 Join
               </button>
@@ -138,7 +188,8 @@ export default function Footer({ links }) {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-[12px] text-white/30 tracking-wider">
-            © {new Date().getFullYear()} Tatva Collective. All rights reserved.
+            © {new Date().getFullYear()} Tattvam Collective. All rights
+            reserved.
           </p>
 
           <div className="flex gap-8">

@@ -55,7 +55,7 @@ export async function POST(req) {
             <tr>
               <td style="background:#111111; padding:24px 32px; text-align:center;">
                 <h1 style="margin:0; color:#ffffff; font-size:24px; font-weight:600;">
-                  Tatvam Collective
+                  Tattvam Collective
                 </h1>
                 <p style="margin:8px 0 0; color:#C6A77D; font-size:14px;">
                   New Contact Inquiry

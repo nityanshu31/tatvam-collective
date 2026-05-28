@@ -10,6 +10,7 @@ const FounderSchema = new mongoose.Schema({
     linkedin: String,
     email: String,
     twitter: String,
+    instagram: String,
   },
 
   achievements: [String],
@@ -35,6 +36,13 @@ const AboutPageSchema = new mongoose.Schema(
       tagline: String,
       title: String,
       description: String,
+
+      // Fixed years of experience field - keep this as a dedicated property
+      // so it cannot be removed by editing the stats array.
+      yearsExperience: {
+        type: String,
+        default: "15+",
+      },
 
       stats: [
         {

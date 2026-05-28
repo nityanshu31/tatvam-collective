@@ -37,9 +37,21 @@ export async function PUT(req) {
       ...(existing?.toObject() || {}),
       ...body,
 
+      // Ensure we preserve existing visibility and studio nested fields
       visibility: {
         ...(existing?.visibility || {}),
         ...(body?.visibility || {}),
+      },
+
+      studio: {
+        ...(existing?.studio || {}),
+        ...(body?.studio || {}),
+
+        // Always ensure yearsExperience exists (prevent accidental removal)
+        yearsExperience:
+          (body?.studio && body.studio.yearsExperience) ||
+          existing?.studio?.yearsExperience ||
+          "15+",
       },
     };
 

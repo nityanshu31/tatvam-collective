@@ -252,6 +252,8 @@ export default function AboutDashboardPage() {
           return founder;
         });
       }
+
+  // yearsExperience is managed in the model / API; dashboard no longer auto-populates it
       
       const res = await fetch("/api/about", {
         method: "PUT",
@@ -567,6 +569,8 @@ export default function AboutDashboardPage() {
                 />
               </div>
 
+              {/* years of experience field removed as requested */}
+
               {/* STATS */}
 <div className="border-t pt-6">
 
@@ -605,7 +609,7 @@ export default function AboutDashboardPage() {
 
   <div className="space-y-5">
 
-    {formData?.studio?.stats?.map((stat, index) => (
+  {formData?.studio?.stats?.map((stat, index) => (
 
       <div
         key={index}
@@ -621,21 +625,16 @@ export default function AboutDashboardPage() {
           <button
             type="button"
             onClick={() => {
-              const updated =
-                formData.studio.stats.filter(
-                  (_, i) => i !== index
-                );
-
+              const updated = formData.studio.stats.filter((_, i) => i !== index);
               setFormData((prev) => ({
                 ...prev,
-
                 studio: {
                   ...prev.studio,
                   stats: updated,
                 },
               }));
             }}
-            className="text-red-500 text-sm"
+            className={`text-red-500 text-sm`}
           >
             Remove
           </button>
@@ -839,6 +838,13 @@ export default function AboutDashboardPage() {
                       placeholder="Twitter/X URL"
                       value={founder?.social?.twitter || ""}
                       onChange={(e) => updateFounderSocial(index, "twitter", e.target.value)}
+                      className="border p-4 rounded-xl md:col-span-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    />
+                    <input
+                      type="url"
+                      placeholder="Instagram URL"
+                      value={founder?.social?.instagram || ""}
+                      onChange={(e) => updateFounderSocial(index, "instagram", e.target.value)}
                       className="border p-4 rounded-xl md:col-span-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                     />
 
