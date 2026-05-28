@@ -98,7 +98,36 @@ export default function AboutDashboardPage() {
       const result = await res.json();
 
       if (result.success) {
-        setFormData(result.data);
+        // Ensure there is always a 'years' stat in studio.stats and keep it as the first item
+        const dataCopy = { ...result.data };
+        const statsArr = Array.isArray(dataCopy?.studio?.stats)
+          ? [...dataCopy.studio.stats]
+          : [];
+
+        const yearIndex = statsArr.findIndex((s) =>
+          /year/i.test(String(s.label || "")) || /year/i.test(String(s.value || ""))
+        );
+
+        if (yearIndex === -1) {
+          // No year stat found - add a default Years stat at the front with fixed label
+          statsArr.unshift({ value: "15+", label: "Years of Excellence" });
+        } else if (yearIndex > 0) {
+          // Move existing year stat to the front so it's treated as the required stat
+          const [yearStat] = statsArr.splice(yearIndex, 1);
+          // Enforce the fixed label for the primary stat
+          yearStat.label = "Years of Excellence";
+          statsArr.unshift(yearStat);
+        } else if (yearIndex === 0) {
+          // If the year-like stat already at index 0, ensure it has the fixed label
+          statsArr[0].label = "Years of Excellence";
+        }
+
+        dataCopy.studio = {
+          ...(dataCopy.studio || {}),
+          stats: statsArr,
+        };
+
+        setFormData(dataCopy);
         toast.success('About page data loaded successfully!');
       }
     } catch (error) {
@@ -251,6 +280,20 @@ export default function AboutDashboardPage() {
           }
           return founder;
         });
+      }
+      // Ensure the primary Years stat has the fixed label before saving
+      if (!Array.isArray(processedData.studio?.stats)) {
+        processedData.studio = { ...(processedData.studio || {}), stats: [] };
+      }
+
+      if (processedData.studio.stats.length === 0) {
+        processedData.studio.stats.unshift({ value: "15+", label: "Years of Excellence" });
+      } else {
+        // enforce label for first stat and default value if empty
+        processedData.studio.stats[0].label = "Years of Excellence";
+        if (!processedData.studio.stats[0].value) {
+          processedData.studio.stats[0].value = "15+";
+        }
       }
 
   // yearsExperience is managed in the model / API; dashboard no longer auto-populates it
@@ -607,38 +650,37 @@ export default function AboutDashboardPage() {
 
   </div>
 
-  <div className="space-y-5">
+          <div className="space-y-5">
 
-  {formData?.studio?.stats?.map((stat, index) => (
+  {formData?.studio?.stats?.map((stat, index) => {
+    const isYearStat = index === 0; // we ensure the year stat is always at index 0
 
-      <div
-        key={index}
-        className="border rounded-2xl p-5"
-      >
-
+    return (
+      <div key={index} className="border rounded-2xl p-5">
         <div className="flex items-center justify-between mb-5">
+          <h4 className="font-medium">Stat {index + 1}</h4>
 
-          <h4 className="font-medium">
-            Stat {index + 1}
-          </h4>
-
-          <button
-            type="button"
-            onClick={() => {
-              const updated = formData.studio.stats.filter((_, i) => i !== index);
-              setFormData((prev) => ({
-                ...prev,
-                studio: {
-                  ...prev.studio,
-                  stats: updated,
-                },
-              }));
-            }}
-            className={`text-red-500 text-sm`}
-          >
-            Remove
-          </button>
-
+          {isYearStat ? (
+            // Fixed non-editable label for the primary years stat
+            <span className="text-sm text-gray-700 font-medium">Years of Excellence</span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                const updated = formData.studio.stats.filter((_, i) => i !== index);
+                setFormData((prev) => ({
+                  ...prev,
+                  studio: {
+                    ...prev.studio,
+                    stats: updated,
+                  },
+                }));
+              }}
+              className={`text-red-500 text-sm`}
+            >
+              Remove
+            </button>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
@@ -648,16 +690,11 @@ export default function AboutDashboardPage() {
             placeholder="Value (Example: 50+)"
             value={stat.value}
             onChange={(e) => {
-              const updated = [
-                ...formData.studio.stats,
-              ];
-
-              updated[index].value =
-                e.target.value;
+              const updated = [...formData.studio.stats];
+              updated[index].value = e.target.value;
 
               setFormData((prev) => ({
                 ...prev,
-
                 studio: {
                   ...prev.studio,
                   stats: updated,
@@ -667,34 +704,40 @@ export default function AboutDashboardPage() {
             className="border p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
           />
 
-          <input
-            type="text"
-            placeholder="Label (Example: Projects Delivered)"
-            value={stat.label}
-            onChange={(e) => {
-              const updated = [
-                ...formData.studio.stats,
-              ];
+          {isYearStat ? (
+            // Show fixed, non-editable label for the primary stat
+            <input
+              type="text"
+              value={"Years of Excellence"}
+              disabled
+              className="border p-4 rounded-xl bg-gray-100 text-gray-700 cursor-not-allowed"
+            />
+          ) : (
+            <input
+              type="text"
+              placeholder="Label (Example: Projects Delivered)"
+              value={stat.label}
+              onChange={(e) => {
+                const updated = [...formData.studio.stats];
+                updated[index].label = e.target.value;
 
-              updated[index].label =
-                e.target.value;
-
-              setFormData((prev) => ({
-                ...prev,
-
-                studio: {
-                  ...prev.studio,
-                  stats: updated,
-                },
-              }));
-            }}
-            className="border p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-          />
+                setFormData((prev) => ({
+                  ...prev,
+                  studio: {
+                    ...prev.studio,
+                    stats: updated,
+                  },
+                }));
+              }}
+              className="border p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          )}
 
         </div>
 
       </div>
-    ))}
+    );
+  })}
 
   </div>
 

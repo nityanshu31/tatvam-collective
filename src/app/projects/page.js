@@ -650,18 +650,28 @@ export default function ProjectsPage() {
           if (aboutJson.success && aboutJson.data) {
             const studioStats = aboutJson.data?.studio?.stats;
 
-            // First prefer the studio.yearsExperience fixed field (added to schema)
-            if (aboutJson.data?.studio?.yearsExperience) {
-              years = aboutJson.data.studio.yearsExperience;
-            } else if (Array.isArray(studioStats)) {
-              // fallback: find a stat whose label or value mentions "year(s)"
-              const yearStat = studioStats.find((s) =>
-                /year/i.test(String(s.label || "")) || /year/i.test(String(s.value || ""))
-              );
+            // Prefer the studio.stats first (dashboard ensures a Years stat is present at index 0)
+            if (Array.isArray(studioStats) && studioStats.length > 0) {
+              // The dashboard keeps the year stat at index 0 — use it if it has a value.
+              const primaryStat = studioStats[0];
 
-              if (yearStat && yearStat.value) {
-                years = yearStat.value;
+              if (primaryStat && primaryStat.value) {
+                years = primaryStat.value;
+              } else {
+                // If primary stat doesn't have value, attempt to find any year-like stat
+                const yearStat = studioStats.find((s) =>
+                  /year/i.test(String(s.label || "")) || /year/i.test(String(s.value || ""))
+                );
+
+                if (yearStat && yearStat.value) {
+                  years = yearStat.value;
+                }
               }
+            }
+
+            // If not found in stats, fallback to the explicit schema field (if present)
+            if ((!years || years === "-") && aboutJson.data?.studio?.yearsExperience) {
+              years = aboutJson.data.studio.yearsExperience;
             }
 
             // fallback: compute from hero recognized/established year if available
