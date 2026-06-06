@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import Blog from "@/models/Blog";
 import { connectDB } from "@/lib/db";
+import { revalidatePath } from 'next/cache';
 
 export async function PUT(req, { params }) {
   try {
@@ -69,6 +70,13 @@ export async function PUT(req, { params }) {
         }
       );
 
+    // revalidate listing
+    try {
+      revalidatePath('/blog');
+    } catch (e) {
+      console.warn('revalidatePath failed:', e?.message || e);
+    }
+
     return NextResponse.json({
       success: true,
       blog: updatedBlog,
@@ -114,6 +122,13 @@ export async function DELETE(req, context) {
         { success: false, message: `Blog not found for id: ${id}` },
         { status: 404 }
       );
+    }
+
+    // revalidate listing after delete
+    try {
+      revalidatePath('/blog');
+    } catch (e) {
+      console.warn('revalidatePath failed:', e?.message || e);
     }
 
     return NextResponse.json({

@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import Blog from "@/models/Blog";
 import {connectDB} from "@/lib/db";
+import { revalidatePath } from 'next/cache';
 
 export async function GET() {
   try {
@@ -81,6 +82,13 @@ export async function POST(req) {
       ...body,
       slug,
     });
+
+    // revalidate the blog listing so production prerender is refreshed
+    try {
+      revalidatePath('/blog');
+    } catch (e) {
+      console.warn('revalidatePath failed:', e?.message || e);
+    }
 
     return NextResponse.json({
       success: true,

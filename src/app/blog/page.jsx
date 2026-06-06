@@ -5,6 +5,10 @@ import Image from "next/image";
 import Blog from "@/models/Blog";
 import { connectDB } from "@/lib/db";
 
+// Force this page to always render dynamically on the server so production
+// won't serve a stale prerendered HTML snapshot.
+export const dynamic = "force-dynamic";
+
 async function getBlogs() {
   const res = await fetch(
     `/api/blogs`,
