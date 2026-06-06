@@ -16,6 +16,7 @@ export default function AdminBlogs() {
   const [editingBlog, setEditingBlog] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [sections, setSections] = useState([{ heading: "", content: "" }]);
+  const [errors, setErrors] = useState({ title: "", images: "", sections: [] });
   
   // Drag state for image upload
   const [isDragging, setIsDragging] = useState(false);
@@ -103,6 +104,8 @@ export default function AdminBlogs() {
       
       if (uploadedImages.length > 0) {
         setImages((prev) => [...prev, ...uploadedImages]);
+        // clear image error when we have images
+        setErrors((prev) => ({ ...prev, images: "" }));
         toast.success(`${uploadedImages.length} image(s) uploaded successfully`);
       }
     } catch (error) {
@@ -143,6 +146,7 @@ export default function AdminBlogs() {
     setImages([]);
     setSections([{ heading: "", content: "" }]);
     setEditingBlog(null);
+    setErrors({ title: "", images: "", sections: [] });
   };
 
   const handleAdd = () => {
@@ -156,21 +160,15 @@ export default function AdminBlogs() {
     setImages(blog.images || []);
     setSections(blog.sections?.length ? blog.sections : [{ heading: "", content: "" }]);
     setShowForm(true);
+    // clear errors when loading existing blog
+    setErrors({ title: "", images: "", sections: [] });
   };
 
   // SUBMIT BLOG
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!title.trim()) {
-      toast.error("Please enter a blog title");
-      return;
-    }
-    
-    if (sections.length === 0 || sections.every(s => !s.heading.trim() && !s.content.trim())) {
-      toast.error("Please add at least one section with content");
-      return;
-    }
+    // validate on submit
+    if (!validateForm()) return;
     
     const url = editingBlog ? `/api/blogs/manage/${editingBlog._id}` : "/api/blogs";
     const method = editingBlog ? "PUT" : "POST";
@@ -198,6 +196,45 @@ export default function AdminBlogs() {
     }
   };
 
+  // Client-side validation
+  const validateForm = () => {
+    let ok = true;
+    const newErrors = { title: "", images: "", sections: [] };
+
+    if (!title || !title.trim()) {
+      newErrors.title = "Title is required";
+      ok = false;
+    }
+
+    if (!Array.isArray(images) || images.length === 0) {
+      newErrors.images = "At least one image is required";
+      ok = false;
+    }
+
+    if (!Array.isArray(sections) || sections.length === 0) {
+      newErrors.sections = sections.map(() => "Section heading and content are required");
+      ok = false;
+    } else {
+      newErrors.sections = sections.map((sec) => {
+        if (!sec || !sec.heading?.toString().trim() || !sec.content?.toString().trim()) {
+          ok = false;
+          return "Heading and content are required";
+        }
+        return "";
+      });
+    }
+
+    setErrors(newErrors);
+    // show a toast summary if invalid
+    if (!ok) {
+      if (newErrors.title) toast.error(newErrors.title);
+      else if (newErrors.images) toast.error(newErrors.images);
+      else toast.error("Please fix the errors in the form");
+    }
+
+    return ok;
+  };
+
   // DELETE BLOG
   const handleDeleteClick = (blogId, blogTitle) => {
     setDeleteDialog({
@@ -213,9 +250,17 @@ export default function AdminBlogs() {
       const res = await fetch(`/api/blogs/manage/${deleteDialog.blogId}`, {
         method: "DELETE"
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        const text = await res.text();
+        console.error('Delete failed, non-json response:', res.status, text);
+        throw new Error(`Delete failed: ${res.status} ${text}`);
+      }
       
       if (data.success) {
+        console.log('Delete response:', data);
         toast.success("Blog deleted successfully");
         fetchBlogs();
         setDeleteDialog({ isOpen: false, blogId: null, blogTitle: "" });
@@ -232,12 +277,21 @@ export default function AdminBlogs() {
   const removeImage = (indexToRemove) => {
     setImages(images.filter((_, idx) => idx !== indexToRemove));
     toast.info("Image removed");
+    // clear image error if we still have images
+    setErrors((prev) => ({ ...prev, images: images.length - 1 > 0 ? "" : prev.images }));
   };
 
   const updateSection = (index, field, value) => {
     const updated = [...sections];
     updated[index][field] = value;
     setSections(updated);
+    // clear section-specific error when user edits
+    setErrors((prev) => {
+      const newSections = [...(prev.sections || [])];
+      if (!newSections[index]) newSections[index] = "";
+      newSections[index] = "";
+      return { ...prev, sections: newSections };
+    });
   };
 
   const removeSection = (indexToRemove) => {
@@ -553,8 +607,11 @@ export default function AdminBlogs() {
                       placeholder="Enter an engaging title..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] focus:border-transparent transition"
+                      className={`w-full border rounded-xl px-4 py-3 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] focus:border-transparent transition ${errors.title ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'}`}
                     />
+                    {errors.title && (
+                      <p className="text-sm text-red-600 mt-2">{errors.title}</p>
+                    )}
                   </div>
 
                   {/* IMAGE UPLOAD */}
@@ -567,11 +624,7 @@ export default function AdminBlogs() {
                       onDragLeave={onDragLeave}
                       onDrop={onDrop}
                       onClick={() => fileInputRef.current?.click()}
-                      className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${
-                        isDragging 
-                          ? "border-[#C6A77D] bg-[#C6A77D] bg-opacity-5" 
-                          : "border-gray-200 hover:border-[#C6A77D]"
-                      }`}
+                      className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition ${isDragging ? "border-[#C6A77D] bg-[#C6A77D] bg-opacity-5" : "hover:border-[#C6A77D]"} ${errors.images ? 'border-red-500' : 'border-gray-200'}`}
                     >
                       <input
                         ref={fileInputRef}
@@ -585,6 +638,10 @@ export default function AdminBlogs() {
                       <p className="text-black font-medium">Click or drag images to upload</p>
                       <p className="text-gray-400 text-sm mt-1">PNG, JPG, GIF up to 5MB</p>
                     </div>
+
+                    {errors.images && (
+                      <p className="text-sm text-red-600 mt-2">{errors.images}</p>
+                    )}
 
                     {/* Upload Progress */}
                     {uploading && (
@@ -654,14 +711,17 @@ export default function AdminBlogs() {
                               placeholder="Section Heading"
                               value={section.heading}
                               onChange={(e) => updateSection(index, "heading", e.target.value)}
-                              className="w-full border border-gray-200 rounded-lg px-4 py-2 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D]"
+                              className={`w-full border rounded-lg px-4 py-2 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] ${errors.sections?.[index] ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'}`}
                             />
                             <textarea
                               placeholder="Write your content here..."
                               value={section.content}
                               onChange={(e) => updateSection(index, "content", e.target.value)}
-                              className="w-full border border-gray-200 rounded-lg px-4 py-2 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] min-h-[100px] resize-y"
+                              className={`w-full border rounded-lg px-4 py-2 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] min-h-[100px] resize-y ${errors.sections?.[index] ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'}`}
                             />
+                            {errors.sections?.[index] && (
+                              <p className="text-sm text-red-600 mt-2">{errors.sections[index]}</p>
+                            )}
                           </div>
                         </div>
                       ))}

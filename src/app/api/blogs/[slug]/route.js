@@ -8,13 +8,14 @@ export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { slug } = await params;
+    const { slug: rawSlug } = params;
+
+    // decode the slug in case it was encoded in the URL
+    const slug = decodeURIComponent(rawSlug);
 
     console.log("slug:", slug);
 
-    const blog = await Blog.findOne({
-      slug,
-    });
+    const blog = await Blog.findOne({ slug });
 
     console.log("blog:", blog);
 
