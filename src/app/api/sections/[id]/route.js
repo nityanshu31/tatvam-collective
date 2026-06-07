@@ -7,7 +7,7 @@ import Section from "@/models/Section";
 export async function DELETE(request, { params }) {
   try {
     // IMPORTANT: The folder name [id] makes the parameter available as params.id
-    const id = params.id;
+    const { id } = await params;
     
     console.log("DELETE - Received ID:", id);
     
@@ -50,7 +50,7 @@ export async function DELETE(request, { params }) {
 // PATCH - Partial update (for toggling visibility)
 export async function PATCH(request, { params }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     
     console.log("PATCH - Received ID:", id);
     
@@ -112,7 +112,7 @@ export async function PATCH(request, { params }) {
 // PUT - Full update
 export async function PUT(request, { params }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     
     console.log("PUT - Received ID:", id);
     
@@ -158,7 +158,7 @@ export async function PUT(request, { params }) {
 // GET - Get a single section
 export async function GET(request, { params }) {
   try {
-    const id = params.id;
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json(

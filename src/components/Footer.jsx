@@ -20,12 +20,12 @@ export default function Footer({ links }) {
     {
       name: "Instagram",
       icon: InstagramLogoIcon,
-      link: "https://www.instagram.com/tatvam_collective",
+      link: "https://www.instagram.com/tattvam_collective/",
     },
     {
       name: "LinkedIn",
       icon: LinkedInLogoIcon,
-      link: "#",
+      link: "https://www.linkedin.com/company/tattvam-collective",
     },
    
 
@@ -186,22 +186,38 @@ export default function Footer({ links }) {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-[12px] text-white/30 tracking-wider">
-            © {new Date().getFullYear()} Tattvam Collective. All rights
-            reserved.
-          </p>
+        <div className="pt-8 flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-[12px] text-white/30 tracking-wider">
+              © {new Date().getFullYear()} Tattvam Collective. All rights reserved.
+            </p>
 
-          <div className="flex gap-8">
-            {["Privacy", "Terms", "Sitemap"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-[12px] text-white/30 hover:text-white/70 tracking-wider transition"
-              >
-                {item}
-              </a>
-            ))}
+            <div className="flex gap-8">
+              {[
+                { name: "Privacy", href: "/privacy" },
+                { name: "Terms", href: "/terms" },
+                { name: "Sitemap", href: "/sitemap" },
+              ].map((item) => (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="text-[12px] text-white/30 hover:text-white/70 tracking-wider transition"
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-center pt-4 border-t border-white/5">
+            <a
+              href="https://www.centrionyx.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-cormorant italic text-[14px] text-white/25 hover:text-white/60 tracking-widest transition duration-300 font-light"
+            >
+              Powered by Centrionyx
+            </a>
           </div>
         </div>
       </div>

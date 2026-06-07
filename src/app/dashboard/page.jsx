@@ -1,17 +1,17 @@
 export default function DashboardPage() {
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
-      {/* Fixed Background Image */}
+    <div className="relative h-full w-full overflow-hidden">
+      {/* Background Image */}
       <div 
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=2070&auto=format&fit=crop')" }}
       />
       
       {/* Overlay for better text readability */}
-      <div className="fixed inset-0 bg-black/50" />
+      <div className="absolute inset-0 bg-black/50" />
       
-      {/* Fixed Content Layer - no scrolling */}
-      <div className="fixed inset-0 z-10 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
+      {/* Content Layer - no scrolling */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
         
         {/* Big Welcome Message */}
         <div className="space-y-8 max-w-4xl">

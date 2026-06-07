@@ -9,7 +9,7 @@ export async function PUT(req, { params }) {
   try {
     await connectDB();
 
-    const { id } = params;
+    const { id } = await params;
 
     const body = await req.json();
 
@@ -98,7 +98,8 @@ export async function DELETE(req, context) {
     console.log("DELETE req.url:", req.url);
 
     // Try to get id from params, fall back to extracting from URL path
-    const idFromParams = context && context.params && context.params.id;
+    const resolvedParams = context && context.params ? await context.params : null;
+    const idFromParams = resolvedParams && resolvedParams.id;
     const url = new URL(req.url);
     const parts = url.pathname.split("/").filter(Boolean);
     const idFromPath = parts[parts.length - 1];

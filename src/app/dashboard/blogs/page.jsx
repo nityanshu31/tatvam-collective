@@ -17,11 +17,11 @@ export default function AdminBlogs() {
   const [showForm, setShowForm] = useState(false);
   const [sections, setSections] = useState([{ heading: "", content: "" }]);
   const [errors, setErrors] = useState({ title: "", images: "", sections: [] });
-  
+
   // Drag state for image upload
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
-  
+
   // Delete dialog state
   const [deleteDialog, setDeleteDialog] = useState({
     isOpen: false,
@@ -64,44 +64,44 @@ export default function AdminBlogs() {
   // IMAGE UPLOAD
   const handleImageUpload = async (files) => {
     if (!files || files.length === 0) return;
-    
+
     setUploading(true);
     setUploadProgress(0);
-    
+
     try {
       const uploadedImages = [];
       const fileArray = Array.from(files);
-      
+
       for (let i = 0; i < fileArray.length; i++) {
         const file = fileArray[i];
-        
+
         // Validate file type
         if (!file.type.startsWith("image/")) {
           toast.error(`${file.name} is not an image file`);
           continue;
         }
-        
+
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
           toast.error(`${file.name} exceeds 5MB limit`);
           continue;
         }
-        
+
         const base64 = await convertToBase64(file);
-        
+
         const res = await fetch("/api/upload", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: base64 }),
         });
-        
+
         const data = await res.json();
         if (data.imageUrl) {
           uploadedImages.push(data.imageUrl);
         }
         setUploadProgress(((i + 1) / fileArray.length) * 100);
       }
-      
+
       if (uploadedImages.length > 0) {
         setImages((prev) => [...prev, ...uploadedImages]);
         // clear image error when we have images
@@ -169,26 +169,26 @@ export default function AdminBlogs() {
     e.preventDefault();
     // validate on submit
     if (!validateForm()) return;
-    
+
     const url = editingBlog ? `/api/blogs/manage/${editingBlog._id}` : "/api/blogs";
     const method = editingBlog ? "PUT" : "POST";
-    
+
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, images, sections }),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.success) {
         toast.success(editingBlog ? "Blog updated successfully!" : "Blog published successfully!");
         resetForm();
         setShowForm(false);
         fetchBlogs();
       } else {
-        toast.error(data.error || "Something went wrong");
+        toast.error(data.message || data.error || "Something went wrong");
       }
     } catch (error) {
       console.error("Submit error:", error);
@@ -258,14 +258,14 @@ export default function AdminBlogs() {
         console.error('Delete failed, non-json response:', res.status, text);
         throw new Error(`Delete failed: ${res.status} ${text}`);
       }
-      
+
       if (data.success) {
         console.log('Delete response:', data);
         toast.success("Blog deleted successfully");
         fetchBlogs();
         setDeleteDialog({ isOpen: false, blogId: null, blogTitle: "" });
       } else {
-        throw new Error(data.error || "Delete failed");
+        throw new Error(data.message || data.error || "Delete failed");
       }
     } catch (error) {
       toast.error(error.message || "Failed to delete blog");
@@ -282,9 +282,11 @@ export default function AdminBlogs() {
   };
 
   const updateSection = (index, field, value) => {
-    const updated = [...sections];
-    updated[index][field] = value;
-    setSections(updated);
+    setSections((prev) =>
+      prev.map((sec, idx) =>
+        idx === index ? { ...sec, [field]: value } : sec
+      )
+    );
     // clear section-specific error when user edits
     setErrors((prev) => {
       const newSections = [...(prev.sections || [])];
@@ -300,17 +302,25 @@ export default function AdminBlogs() {
       return;
     }
     setSections(sections.filter((_, idx) => idx !== indexToRemove));
+    setErrors((prev) => ({
+      ...prev,
+      sections: (prev.sections || []).filter((_, idx) => idx !== indexToRemove),
+    }));
   };
 
   const addSection = () => {
     setSections([...sections, { heading: "", content: "" }]);
+    setErrors((prev) => ({
+      ...prev,
+      sections: [...(prev.sections || []), ""],
+    }));
   };
 
   // Stats Component
   const BlogStats = () => {
     const totalImages = blogs.reduce((sum, blog) => sum + (blog.images?.length || 0), 0);
     const totalSections = blogs.reduce((sum, blog) => sum + (blog.sections?.length || 0), 0);
-    
+
     return (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
@@ -327,7 +337,7 @@ export default function AdminBlogs() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#C6A77D] rounded-lg flex items-center justify-center">
@@ -345,7 +355,7 @@ export default function AdminBlogs() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#6B7280] rounded-lg flex items-center justify-center">
@@ -368,7 +378,7 @@ export default function AdminBlogs() {
   // Delete Confirmation Dialog Component
   const DeleteConfirmDialog = () => {
     if (!deleteDialog.isOpen) return null;
-    
+
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-40 backdrop-blur-sm animate-fade-in">
         <div className="bg-white rounded-2xl max-w-md w-full shadow-xl animate-slide-in overflow-hidden">
@@ -384,7 +394,7 @@ export default function AdminBlogs() {
               <h3 className="text-xl font-semibold text-black">Delete Blog</h3>
             </div>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-black">"{deleteDialog.blogTitle}"</span>? 
+              Are you sure you want to delete <span className="font-semibold text-black">"{deleteDialog.blogTitle}"</span>?
               This action cannot be undone.
             </p>
             <div className="flex gap-3">
@@ -526,7 +536,7 @@ export default function AdminBlogs() {
                   Create, edit, and manage your blog posts
                 </p>
               </div>
-              
+
               <button
                 onClick={handleAdd}
                 className="px-4 sm:px-6 py-2 sm:py-3 bg-black text-white text-sm sm:text-base rounded-lg hover:bg-gray-800 transition flex items-center gap-2"
@@ -597,7 +607,7 @@ export default function AdminBlogs() {
                     </svg>
                   </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                   {/* TITLE */}
                   <div>
@@ -606,7 +616,10 @@ export default function AdminBlogs() {
                       type="text"
                       placeholder="Enter an engaging title..."
                       value={title}
-                      onChange={(e) => setTitle(e.target.value)}
+                      onChange={(e) => {
+                        setTitle(e.target.value);
+                        setErrors((prev) => ({ ...prev, title: "" }));
+                      }}
                       className={`w-full border rounded-xl px-4 py-3 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] focus:border-transparent transition ${errors.title ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'}`}
                     />
                     {errors.title && (
@@ -617,7 +630,7 @@ export default function AdminBlogs() {
                   {/* IMAGE UPLOAD */}
                   <div>
                     <label className="block text-sm font-medium text-black mb-2">Images</label>
-                    
+
                     {/* Dropzone */}
                     <div
                       onDragOver={onDragOver}

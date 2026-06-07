@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const SectionControls = ({ sections, visibleSections, onToggle }) => {
+const SectionControls = ({ types, selectedType, onSelectType }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef(null);
@@ -28,8 +28,7 @@ const SectionControls = ({ sections, visibleSections, onToggle }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const visibleCount = visibleSections.length;
-  const totalCount = sections.length;
+  const totalCount = types.length;
 
   // Desktop: Show all toggles horizontally
   if (!isMobile) {
@@ -40,62 +39,39 @@ const SectionControls = ({ sections, visibleSections, onToggle }) => {
         className="mb-8 pb-4 border-b border-[var(--border)]"
       >
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm font-medium text-[var(--black)]">Show:</span>
-          {sections.map((section) => {
-            const isVisible = visibleSections.includes(section.id);
+          <span className="text-sm font-medium text-[var(--black)]">Filter by Category:</span>
+          {types.map((type) => {
+            const isSelected = selectedType === type;
             return (
               <button
-                key={section.id}
-                onClick={() => onToggle(section.id, !isVisible)}
-                className={`px-3 py-1.5 rounded-full text-sm transition-all duration-200 ${
-                  isVisible
-                    ? "bg-[var(--black)] text-white"
-                    : "bg-gray-100 text-[var(--muted)] hover:bg-gray-200"
+                key={type}
+                onClick={() => onSelectType(type)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isSelected
+                    ? "bg-[var(--black)] text-white shadow-sm scale-102"
+                    : "bg-gray-100 text-[var(--muted)] hover:bg-gray-250"
                 }`}
               >
-                {section.title}
-                <span className="ml-1 text-xs opacity-70">({section.type})</span>
+                {type}
               </button>
             );
           })}
-          
-          {/* Reset button */}
-          {visibleCount !== totalCount && (
-            <button
-              onClick={() => sections.forEach(s => {
-                if (!visibleSections.includes(s.id)) {
-                  onToggle(s.id, true);
-                }
-              })}
-              className="ml-2 text-xs text-[var(--accent)] hover:underline"
-            >
-              Show All
-            </button>
-          )}
         </div>
-        
-        {/* Layout indicator */}
-        <p className="text-xs text-[var(--muted)] mt-3">
-          {visibleCount === 1 && "Single column layout"}
-          {visibleCount === 2 && "Two column layout"}
-          {visibleCount >= 3 && "Three column layout"}
-          {visibleCount === 0 && "No sections visible"}
-        </p>
       </motion.div>
     );
   }
 
   // Mobile: Dropdown menu
   return (
-    <div className="mb-6" ref={dropdownRef}>
+    <div className="mb-6 relative" ref={dropdownRef}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center justify-between w-full px-4 py-3 bg-[var(--black)] text-white rounded-xl shadow-md"
       >
         <div className="flex flex-col items-start">
-          <span className="text-xs text-[var(--muted)]">Filter Sections</span>
+          <span className="text-xs text-gray-400">Filter Category</span>
           <span className="text-sm font-medium">
-            Showing {visibleCount} of {totalCount} sections
+            Category: {selectedType}
           </span>
         </div>
         <motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
@@ -111,25 +87,24 @@ const SectionControls = ({ sections, visibleSections, onToggle }) => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute left-4 right-4 mt-2 bg-white rounded-xl shadow-xl border border-[var(--border)] z-50"
+            className="absolute left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-[var(--border)] z-50 overflow-hidden"
           >
-            <div className="p-3">
-              {sections.map((section) => {
-                const isVisible = visibleSections.includes(section.id);
+            <div className="py-1">
+              {types.map((type) => {
+                const isSelected = selectedType === type;
                 return (
                   <button
-                    key={section.id}
+                    key={type}
                     onClick={() => {
-                      onToggle(section.id, !isVisible);
+                      onSelectType(type);
                       setIsExpanded(false);
                     }}
-                    className="w-full flex items-center justify-between py-3 px-2 border-b border-[var(--border)] last:border-0"
+                    className="w-full flex items-center justify-between py-3 px-4 hover:bg-gray-50 border-b border-gray-100 last:border-0 text-left"
                   >
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium text-[var(--black)]">{section.title}</span>
-                      <span className="text-xs text-[var(--muted)]">{section.type}</span>
-                    </div>
-                    {isVisible && (
+                    <span className={`text-sm font-medium ${isSelected ? "text-[var(--accent)]" : "text-[var(--black)]"}`}>
+                      {type}
+                    </span>
+                    {isSelected && (
                       <svg className="w-5 h-5 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>

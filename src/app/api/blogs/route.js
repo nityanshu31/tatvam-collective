@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import Blog from "@/models/Blog";
-import {connectDB} from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import { revalidatePath } from 'next/cache';
 
 export async function GET() {

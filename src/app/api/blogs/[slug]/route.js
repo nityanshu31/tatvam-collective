@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
   try {
     await connectDB();
 
-    const { slug: rawSlug } = params;
+    const { slug: rawSlug } = await params;
 
     // decode the slug in case it was encoded in the URL
     const slug = decodeURIComponent(rawSlug);
