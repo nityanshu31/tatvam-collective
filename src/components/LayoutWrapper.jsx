@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Footer from "./Footer";
+import CookieConsent from "./CookieConsent";
 import { Menu, X, Home, FolderKanban, User, Mail ,BookOpen } from "lucide-react";
 import Image from "next/image";
 
@@ -205,6 +206,9 @@ export default function LayoutWrapper({ children }) {
 
       {/* Footer */}
       <Footer />
+
+      {/* Cookie / Privacy Policy Consent Banner */}
+      <CookieConsent />
     </>
   );
 }

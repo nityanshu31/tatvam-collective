@@ -168,8 +168,10 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
   };
 
   const handleRemoveGalleryImage = (index) => {
-    setGalleryFiles(prev => prev.filter((_, i) => i !== index));
-    setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+    if (window.confirm("Are you sure you want to remove this image?")) {
+      setGalleryFiles(prev => prev.filter((_, i) => i !== index));
+      setGalleryPreviews(prev => prev.filter((_, i) => i !== index));
+    }
   };
 
   const onSubmit = async (data) => {

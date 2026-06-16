@@ -275,10 +275,12 @@ export default function AdminBlogs() {
   };
 
   const removeImage = (indexToRemove) => {
-    setImages(images.filter((_, idx) => idx !== indexToRemove));
-    toast.info("Image removed");
-    // clear image error if we still have images
-    setErrors((prev) => ({ ...prev, images: images.length - 1 > 0 ? "" : prev.images }));
+    if (window.confirm("Are you sure you want to remove this image?")) {
+      setImages(images.filter((_, idx) => idx !== indexToRemove));
+      toast.info("Image removed");
+      // clear image error if we still have images
+      setErrors((prev) => ({ ...prev, images: images.length - 1 > 0 ? "" : prev.images }));
+    }
   };
 
   const updateSection = (index, field, value) => {
@@ -682,7 +684,8 @@ export default function AdminBlogs() {
                             <button
                               type="button"
                               onClick={() => removeImage(index)}
-                              className="absolute top-1 right-1 bg-black bg-opacity-70 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition"
+                              className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shadow-md transition-all duration-200 hover:scale-110 active:scale-95"
+                              title="Remove image"
                             >
                               ×
                             </button>

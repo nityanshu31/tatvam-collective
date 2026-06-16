@@ -319,14 +319,16 @@ const SectionForm = ({ section, onSave, onClose }) => {
   };
 
   const removeImage = (index) => {
-    const currentImages = getValues("media.images");
-    const newImages = currentImages.filter((_, i) => i !== index);
-    setValue("media.images", newImages);
-    
-    // Update order
-    newImages.forEach((img, idx) => {
-      img.order = idx;
-    });
+    if (window.confirm("Are you sure you want to remove this image?")) {
+      const currentImages = getValues("media.images");
+      const newImages = currentImages.filter((_, i) => i !== index);
+      setValue("media.images", newImages);
+      
+      // Update order
+      newImages.forEach((img, idx) => {
+        img.order = idx;
+      });
+    }
   };
 
   const addBadgeHandler = () => {
@@ -627,13 +629,16 @@ const SectionForm = ({ section, onSave, onClose }) => {
                 {getValues("media.images")?.length > 0 && (
                   <div className="grid grid-cols-2 gap-3">
                     {getValues("media.images").map((img, idx) => (
-                      <div key={idx} className="relative group">
+                      <div key={idx} className="relative">
                         <img src={img.url} alt={img.alt || `Image ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                          <button type="button" onClick={() => removeImage(idx)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeImage(idx)}
+                          className="absolute -top-1.5 -right-1.5 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md transition-all duration-200 hover:scale-110 active:scale-95"
+                          title="Remove image"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
                         <input
                           type="text"
                           placeholder="Alt text"

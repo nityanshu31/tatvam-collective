@@ -99,45 +99,43 @@ export default function InteractiveBlog({ blog }) {
           <div className="border-b border-[#E5E7EB]">
             <div className="max-w-7xl mx-auto px-6 py-16 lg:py-20">
               {galleryImages.length === 1 ? (
-                // Single image - full width
-                <div className="max-w-4xl mx-auto">
-                  <div className="relative group overflow-hidden rounded-2xl">
+                // Single image - elegant widescreen layout
+                <div className="max-w-5xl mx-auto">
+                  <div className="relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100">
                     <img
                       src={galleryImages[0]}
                       alt="Gallery image"
-                      className="w-full h-auto rounded-2xl transition-transform duration-700 group-hover:scale-105"
+                      className="w-full aspect-[16/10] md:aspect-[16/9] max-h-[600px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-102"
                     />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
                 </div>
               ) : galleryImages.length === 2 ? (
-                // Two images - side by side
+                // Two images - side by side landscape
                 <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
                   {galleryImages.map((image, idx) => (
-                    <div key={idx} className="relative group overflow-hidden rounded-2xl">
+                    <div key={idx} className="relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100">
                       <img
                         src={image}
                         alt={`Gallery image ${idx + 1}`}
-                        className="w-full h-[400px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105"
+                        className="w-full aspect-[3/2] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-103"
                       />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                   ))}
                 </div>
               ) : (
-                // Three or more images - masonry style grid
+                // Three or more images - clean geometric grid
                 <div className="max-w-7xl mx-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {galleryImages.map((image, idx) => (
-                      <div key={idx} className={`relative group overflow-hidden rounded-2xl ${
-                        idx === 0 ? 'lg:row-span-2' : ''
-                      }`}>
+                      <div key={idx} className="relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100">
                         <img
                           src={image}
                           alt={`Gallery image ${idx + 1}`}
-                          className={`w-full ${idx === 0 ? 'h-[500px]' : 'h-[300px]'} object-cover rounded-2xl transition-transform duration-700 group-hover:scale-105`}
+                          className="w-full aspect-[3/2] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-103"
                         />
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       </div>
                     ))}
                   </div>

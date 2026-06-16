@@ -153,7 +153,7 @@ export default function Footer({ links }) {
               },
               {
                 label: "Studio",
-                val: "Navrangpura, Vadodara\nGujarat 380009",
+                val: "Vadodara , Gujarat , India - 390001",
               },
             ].map(({ label, val }) => (
               <div key={label} className="mb-6">
@@ -198,13 +198,13 @@ export default function Footer({ links }) {
                 { name: "Terms", href: "/terms" },
                 { name: "Sitemap", href: "/sitemap" },
               ].map((item) => (
-                <a
+                <Link
                   key={item.name}
                   href={item.href}
                   className="text-[12px] text-white/30 hover:text-white/70 tracking-wider transition"
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
