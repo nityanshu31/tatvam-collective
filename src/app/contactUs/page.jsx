@@ -83,7 +83,8 @@ export default function ContactPage() {
 
             <div>
               <h4 className="font-semibold mb-1">Phone</h4>
-              <p className="text-[var(--muted)]">+91 XXXXX XXXXX</p>
+              <p className="text-[var(--muted)]">+91 9898091769</p>
+              <p className="text-[var(--muted)]">+91 9898091779</p>
             </div>
 
             <div>

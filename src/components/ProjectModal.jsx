@@ -273,7 +273,6 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                   className="object-contain"
                   onError={() => handleImageError(idx)}
                   priority={idx === 0}
-                  unoptimized={true}
                   sizes="100vw"
                 />
               </div>
@@ -377,7 +376,6 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                     className="object-contain w-auto h-auto max-w-full max-h-full"
                     onError={() => handleImageError(currentImageIndex)}
                     priority
-                    unoptimized={true}
                     style={{
                       width: 'auto',
                       height: 'auto',
@@ -499,7 +497,6 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                             alt={`Thumbnail ${idx + 1}`}
                             fill
                             className="object-cover"
-                            unoptimized={true}
                           />
                         </button>
                       ))}

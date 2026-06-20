@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const revalidate = 600; // Cache responses for 10 minutes
 import {connectDB} from "@/lib/db";
 import AboutPage from "@/models/AboutPage";
 

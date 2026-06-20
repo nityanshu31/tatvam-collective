@@ -87,4 +87,9 @@ const ProjectSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Indexes for query performance and sorting
+ProjectSchema.index({ order: 1, createdAt: -1 });
+ProjectSchema.index({ type: 1 });
+ProjectSchema.index({ featured: 1 });
+
 export default mongoose.models.Project || mongoose.model('Project', ProjectSchema);

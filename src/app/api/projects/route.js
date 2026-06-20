@@ -1,5 +1,7 @@
 // app/api/projects/route.js
 import { NextResponse } from 'next/server';
+
+export const revalidate = 300; // Cache responses for 5 minutes
 import { connectDB } from "@/lib/db";
 import Project from '@/models/Project';
 

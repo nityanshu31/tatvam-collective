@@ -183,7 +183,6 @@ const ProjectCard = ({ project, index, onClick }) => {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 priority={index < 4}
-                unoptimized={true}
               />
             </motion.div>
           </AnimatePresence>
@@ -602,8 +601,10 @@ export default function ProjectsPage() {
   });
 
   useEffect(() => {
-    fetchProjects();
-    fetchStats();
+    const loadData = async () => {
+      await Promise.all([fetchProjects(), fetchStats()]);
+    };
+    loadData();
   }, []);
 
   const fetchProjects = async () => {

@@ -149,7 +149,7 @@ export default function Footer({ links }) {
               },
               {
                 label: "Phone",
-                val: "+91 XXXX XXXX",
+                val: "+91 9898091769  ,  +91 9898091779",
               },
               {
                 label: "Studio",

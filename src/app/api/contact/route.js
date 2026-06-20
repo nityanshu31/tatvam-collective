@@ -40,7 +40,7 @@ export async function POST(req) {
     // ✅ 3. Send Email (your existing code)
     await resend.emails.send({
       from: "onboarding@resend.dev",
-      to: "nityanshuranawat.deuglo@gmail.com",
+      to: "tatvamcollective@gmail.com",
       subject: `New Contact Inquiry from ${name}`,
       html: `
 <!DOCTYPE html>
