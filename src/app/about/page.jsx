@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, useAnimation, useInView } from "framer-motion";
+import Footer from "@/components/Footer";
 
 // Animation Components
 const FadeInUp = ({ children, delay = 0 }) => {
@@ -615,6 +616,14 @@ export default function AboutPage() {
           </div>
         </section>
       )}
+
+      {/* Footer Section */}
+      <section
+        ref={(el) => (sectionRefs.current[5] = el)}
+        className="snap-start bg-[#111111]"
+      >
+        <Footer />
+      </section>
     </main>
   );
 }

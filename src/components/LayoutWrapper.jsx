@@ -204,8 +204,8 @@ export default function LayoutWrapper({ children }) {
       {/* Main - Adjusted padding for smoother experience */}
       <main className="flex-1 pt-16">{children}</main>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer - Hidden on /about because it is embedded inside the snap container */}
+      {pathname !== "/about" && <Footer />}
 
       {/* Cookie / Privacy Policy Consent Banner */}
       <CookieConsent />

@@ -366,24 +366,16 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
               transition={{ duration: 0.3 }}
               className="relative w-full h-full"
             >
-              <div className="relative w-full h-full flex items-center justify-center">
-                <div className="relative max-w-full max-h-full w-auto h-auto">
-                  <Image
-                    src={imageError[currentImageIndex] ? fallbackImage : allImages[currentImageIndex]}
-                    alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                    width={1200}
-                    height={800}
-                    className="object-contain w-auto h-auto max-w-full max-h-full"
-                    onError={() => handleImageError(currentImageIndex)}
-                    priority
-                    style={{
-                      width: 'auto',
-                      height: 'auto',
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                    }}
-                  />
-                </div>
+              <div className="relative w-full h-full">
+                <Image
+                  src={imageError[currentImageIndex] ? fallbackImage : allImages[currentImageIndex]}
+                  alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                  fill
+                  className="object-contain"
+                  onError={() => handleImageError(currentImageIndex)}
+                  priority
+                  sizes="(max-width: 1200px) 100vw, 1200px"
+                />
               </div>
             </motion.div>
           </AnimatePresence>
