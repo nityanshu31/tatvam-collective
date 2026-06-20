@@ -98,47 +98,31 @@ export default function InteractiveBlog({ blog }) {
         {galleryImages.length > 0 && (
           <div className="border-b border-[#E5E7EB]">
             <div className="max-w-7xl mx-auto px-6 py-16 lg:py-20">
-              {galleryImages.length === 1 ? (
-                // Single image - elegant widescreen layout
+               {galleryImages.length === 1 ? (
+                // Single image - elegant dynamic layout
                 <div className="max-w-5xl mx-auto">
                   <div className="relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100">
                     <img
                       src={galleryImages[0]}
                       alt="Gallery image"
-                      className="w-full aspect-[16/10] md:aspect-[16/9] max-h-[600px] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-102"
+                      className="w-full h-auto rounded-2xl transition-transform duration-700 group-hover:scale-102"
                     />
-                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   </div>
                 </div>
-              ) : galleryImages.length === 2 ? (
-                // Two images - side by side landscape
-                <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+              ) : (
+                // Masonry columns grid for multiple images
+                <div className="max-w-7xl mx-auto columns-1 sm:columns-2 lg:columns-3 gap-6 [column-fill:_balance]">
                   {galleryImages.map((image, idx) => (
-                    <div key={idx} className="relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100">
+                    <div key={idx} className="break-inside-avoid relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100 mb-6">
                       <img
                         src={image}
                         alt={`Gallery image ${idx + 1}`}
-                        className="w-full aspect-[3/2] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-103"
+                        className="w-full h-auto rounded-2xl transition-transform duration-700 group-hover:scale-103"
                       />
-                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </div>
                   ))}
-                </div>
-              ) : (
-                // Three or more images - clean geometric grid
-                <div className="max-w-7xl mx-auto">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {galleryImages.map((image, idx) => (
-                      <div key={idx} className="relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100">
-                        <img
-                          src={image}
-                          alt={`Gallery image ${idx + 1}`}
-                          className="w-full aspect-[3/2] object-cover rounded-2xl transition-transform duration-700 group-hover:scale-103"
-                        />
-                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>

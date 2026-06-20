@@ -69,7 +69,8 @@ const projectSchema = yup.object().shape({
   
   status: yup
     .string()
-    .default("Completed"),
+    .nullable()
+    .default(""),
   
   description: yup
     .string()
@@ -263,7 +264,6 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
   return (
     <div 
       className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center"
-      onClick={onClose}
     >
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 transition-opacity" />
@@ -458,6 +458,7 @@ export default function ProjectForm({ project, onClose, onSuccess }) {
                   {...register("status")}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 >
+                  <option value="">None (Null)</option>
                   <option value="Completed">Completed</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Upcoming">Upcoming</option>

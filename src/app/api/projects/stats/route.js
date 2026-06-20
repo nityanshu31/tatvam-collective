@@ -9,16 +9,33 @@ export async function GET() {
   try {
     await connectDB();
     
-    const [totalProjects, locationStats] = await Promise.all([
+    const [totalProjects, locationStats, typeStats] = await Promise.all([
       Project.countDocuments(),
-      Project.distinct('location')
+      Project.distinct('location'),
+      Project.aggregate([
+        { $group: { _id: "$type", count: { $sum: 1 } } }
+      ])
     ]);
+
+    const typeCounts = { ALL: totalProjects };
+    typeStats.forEach(stat => {
+      if (stat._id) {
+        typeCounts[stat._id] = stat.count;
+      }
+    });
+
+    const types = typeStats
+      .map(stat => stat._id)
+      .filter(Boolean)
+      .sort();
     
     return NextResponse.json({
       success: true,
       stats: {
         totalProjects,
-        citiesCount: locationStats.length
+        citiesCount: locationStats.length,
+        typeCounts,
+        types
       }
     });
     

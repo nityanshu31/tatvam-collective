@@ -259,15 +259,17 @@ const ProjectCard = ({ project, index, onClick }) => {
             {project.type} • {project.category}
           </p>
 
-          <p className="mt-2 inline-flex items-center gap-2">
-            <span className="text-[var(--muted)] text-[11px] uppercase tracking-wider">
-              Status
-            </span>
+          {project.status && (
+            <p className="mt-2 inline-flex items-center gap-2">
+              <span className="text-[var(--muted)] text-[11px] uppercase tracking-wider">
+                Status
+              </span>
 
-            <span className="text-[11px] px-2 py-1 rounded-full border border-[var(--border)] bg-white/50">
-              {project.status}
-            </span>
-          </p>
+              <span className="text-[11px] px-2 py-1 rounded-full border border-[var(--border)] bg-white/50">
+                {project.status}
+              </span>
+            </p>
+          )}
 
           <motion.div
             className="h-[1px] bg-[var(--accent)] mt-3"
@@ -581,18 +583,14 @@ const CategoryFilter = ({
 };
 
 export default function ProjectsPage() {
-  const [projects, setProjects] =
-    useState([]);
-
-  const [selectedProjectId, setSelectedProjectId] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  // FILTER BY TYPE
-  const [activeType, setActiveType] =
-    useState("ALL");
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeType, setActiveType] = useState("ALL");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [types, setTypes] = useState([]);
+  const [projectCounts, setProjectCounts] = useState({ ALL: 0 });
 
   const [stats, setStats] = useState({
     totalProjects: 0,
@@ -601,30 +599,28 @@ export default function ProjectsPage() {
   });
 
   useEffect(() => {
-    const loadData = async () => {
-      await Promise.all([fetchProjects(), fetchStats()]);
-    };
-    loadData();
+    fetchStats();
   }, []);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [page, activeType]);
 
   const fetchProjects = async () => {
     try {
       setLoading(true);
-
-      const res = await fetch(
-        "/api/projects"
-      );
-
+      const url = `/api/projects?page=${page}&limit=6${
+        activeType !== "ALL" ? `&type=${encodeURIComponent(activeType)}` : ""
+      }`;
+      const res = await fetch(url);
       const data = await res.json();
 
       if (data.success) {
         setProjects(data.projects);
+        setTotalPages(data.pagination.totalPages);
       }
     } catch (error) {
-      console.error(
-        "Error fetching projects:",
-        error
-      );
+      console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
@@ -632,16 +628,12 @@ export default function ProjectsPage() {
 
   const fetchStats = async () => {
     try {
-      // Fetch project stats and about page in parallel so we can derive
-      // a dynamic "years of experience" value from the about data.
       const [statsRes, aboutRes] = await Promise.all([
         fetch("/api/projects/stats"),
         fetch("/api/about"),
       ]);
 
       const statsData = await statsRes.json();
-
-      // default fallback
       let years = "-";
 
       try {
@@ -651,15 +643,12 @@ export default function ProjectsPage() {
           if (aboutJson.success && aboutJson.data) {
             const studioStats = aboutJson.data?.studio?.stats;
 
-            // Prefer the studio.stats first (dashboard ensures a Years stat is present at index 0)
             if (Array.isArray(studioStats) && studioStats.length > 0) {
-              // The dashboard keeps the year stat at index 0 — use it if it has a value.
               const primaryStat = studioStats[0];
 
               if (primaryStat && primaryStat.value) {
                 years = primaryStat.value;
               } else {
-                // If primary stat doesn't have value, attempt to find any year-like stat
                 const yearStat = studioStats.find((s) =>
                   /year/i.test(String(s.label || "")) || /year/i.test(String(s.value || ""))
                 );
@@ -670,12 +659,10 @@ export default function ProjectsPage() {
               }
             }
 
-            // If not found in stats, fallback to the explicit schema field (if present)
             if ((!years || years === "-") && aboutJson.data?.studio?.yearsExperience) {
               years = aboutJson.data.studio.yearsExperience;
             }
 
-            // fallback: compute from hero recognized/established year if available
             if ((years === "-" || !years) && aboutJson.data?.hero) {
               const hero = aboutJson.data.hero;
               const refYear = parseInt(hero.recognizedYear) || parseInt(hero.establishedYear);
@@ -697,54 +684,20 @@ export default function ProjectsPage() {
           citiesCount: statsData.stats.citiesCount,
           yearsExperience: years,
         });
+        setTypes(statsData.stats.types || []);
+        setProjectCounts(statsData.stats.typeCounts || { ALL: statsData.stats.totalProjects });
       }
     } catch (error) {
-      console.error(
-        "Error fetching stats:",
-        error
-      );
+      console.error("Error fetching stats:", error);
     }
   };
 
-  // TYPES
-  const types = useMemo(() => {
-    const uniqueTypes = new Set();
+  const handleCategoryChange = (type) => {
+    setActiveType(type);
+    setPage(1);
+  };
 
-    projects.forEach((project) => {
-      if (project.type) {
-        uniqueTypes.add(project.type);
-      }
-    });
-
-    return Array.from(uniqueTypes).sort();
-  }, [projects]);
-
-  // COUNTS
-  const projectCounts = useMemo(() => {
-    const counts = {
-      ALL: projects.length,
-    };
-
-    types.forEach((type) => {
-      counts[type] = projects.filter(
-        (p) => p.type === type
-      ).length;
-    });
-
-    return counts;
-  }, [projects, types]);
-
-  // FILTERED PROJECTS
-  const filteredProjects = useMemo(() => {
-    if (activeType === "ALL") {
-      return projects;
-    }
-
-    return projects.filter(
-      (project) =>
-        project.type === activeType
-    );
-  }, [projects, activeType]);
+  const filteredProjects = projects;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -878,7 +831,7 @@ expression of purpose.
                     activeType
                   }
                   onCategoryChange={
-                    setActiveType
+                    handleCategoryChange
                   }
                   projectCounts={
                     projectCounts
@@ -963,22 +916,49 @@ expression of purpose.
               </motion.div>
             </AnimatePresence>
 
-            <motion.div
-              className="mt-12 lg:mt-16 text-center"
-              initial={{
-                opacity: 0,
-              }}
-              whileInView={{
-                opacity: 1,
-              }}
-              viewport={{
-                once: true,
-              }}
-            >
-              <p className="text-[var(--muted)] text-xs uppercase tracking-[0.3em]">
-                — More Coming Soon —
-              </p>
-            </motion.div>
+            {/* Pagination Controls */}
+            {!loading && totalPages > 1 && (
+              <div className="flex items-center justify-center gap-6 mt-12 lg:mt-16">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  className="px-6 py-3 border border-[var(--border)] rounded-full text-sm font-medium transition-all duration-300 uppercase tracking-wider hover:bg-[var(--black)] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[var(--black)] cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+
+                <span className="text-sm font-medium tracking-widest uppercase">
+                  Page {page} of {totalPages}
+                </span>
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+                  className="px-6 py-3 border border-[var(--border)] rounded-full text-sm font-medium transition-all duration-300 uppercase tracking-wider hover:bg-[var(--black)] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[var(--black)] cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+
+            {page === totalPages && (
+              <motion.div
+                className="mt-12 lg:mt-16 text-center"
+                initial={{
+                  opacity: 0,
+                }}
+                whileInView={{
+                  opacity: 1,
+                }}
+                viewport={{
+                  once: true,
+                }}
+              >
+                <p className="text-[var(--muted)] text-xs uppercase tracking-[0.3em]">
+                  — More Coming Soon —
+                </p>
+              </motion.div>
+            )}
           </div>
         </div>
       </section>

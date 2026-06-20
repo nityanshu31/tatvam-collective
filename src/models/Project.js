@@ -56,8 +56,8 @@ const ProjectSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Completed', 'In Progress', 'Upcoming'],
-    default: 'Completed'
+    enum: ['Completed', 'In Progress', 'Upcoming', '', 'None', null],
+    default: ''
   },
   description: {
     type: String,
@@ -92,4 +92,8 @@ ProjectSchema.index({ order: 1, createdAt: -1 });
 ProjectSchema.index({ type: 1 });
 ProjectSchema.index({ featured: 1 });
 
-export default mongoose.models.Project || mongoose.model('Project', ProjectSchema);
+if (mongoose.models.Project) {
+  delete mongoose.models.Project;
+}
+
+export default mongoose.model('Project', ProjectSchema);

@@ -212,13 +212,13 @@ export default function AdminBlogs() {
     }
 
     if (!Array.isArray(sections) || sections.length === 0) {
-      newErrors.sections = sections.map(() => "Section heading and content are required");
+      newErrors.sections = sections.map(() => "Section content is required");
       ok = false;
     } else {
       newErrors.sections = sections.map((sec) => {
-        if (!sec || !sec.heading?.toString().trim() || !sec.content?.toString().trim()) {
+        if (!sec || !sec.content?.toString().trim()) {
           ok = false;
-          return "Heading and content are required";
+          return "Content is required";
         }
         return "";
       });
@@ -724,7 +724,7 @@ export default function AdminBlogs() {
                           <div className="space-y-3">
                             <input
                               type="text"
-                              placeholder="Section Heading"
+                              placeholder="Section Heading (Optional)"
                               value={section.heading}
                               onChange={(e) => updateSection(index, "heading", e.target.value)}
                               className={`w-full border rounded-lg px-4 py-2 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C6A77D] ${errors.sections?.[index] ? 'border-red-500 focus:ring-red-300' : 'border-gray-200'}`}

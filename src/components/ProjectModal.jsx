@@ -437,7 +437,7 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                   {project.location}
                 </p>
 
-                <div className="grid grid-cols-4 gap-6 mb-6 pb-6 border-b border-[var(--muted)]/20">
+                <div className={`grid ${project.status ? 'grid-cols-4' : 'grid-cols-3'} gap-6 mb-6 pb-6 border-b border-[var(--muted)]/20`}>
                   <div>
                     <p className="text-sm text-[var(--muted)] uppercase tracking-wider mb-1">Year</p>
                     <p className="text-xl font-semibold text-[var(--black)]">{project.year}</p>
@@ -450,10 +450,12 @@ const ProjectModal = ({ projectId, projects, onClose }) => {
                     <p className="text-sm text-[var(--muted)] uppercase tracking-wider mb-1">Type</p>
                     <p className="text-xl font-semibold text-[var(--black)]">{project.type}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-[var(--muted)] uppercase tracking-wider mb-1">Status</p>
-                    <p className="text-xl font-semibold text-[var(--black)]">{project.status}</p>
-                  </div>
+                  {project.status && (
+                    <div>
+                      <p className="text-sm text-[var(--muted)] uppercase tracking-wider mb-1">Status</p>
+                      <p className="text-xl font-semibold text-[var(--black)]">{project.status}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-8">

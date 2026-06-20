@@ -32,16 +32,16 @@ export async function PUT(req, { params }) {
       return NextResponse.json(
         {
           success: false,
-          message: "At least one section (with heading and content) is required",
+          message: "At least one section is required",
         },
         { status: 400 }
       );
     }
 
     for (const sec of body.sections) {
-      if (!sec || !sec.heading || !sec.content || !sec.heading.toString().trim() || !sec.content.toString().trim()) {
+      if (!sec || !sec.content || !sec.content.toString().trim()) {
         return NextResponse.json(
-          { success: false, message: "Each section must have a heading and content" },
+          { success: false, message: "Each section must have content" },
           { status: 400 }
         );
       }
