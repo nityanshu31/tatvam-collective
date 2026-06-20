@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 import {
   InstagramLogoIcon,
@@ -8,6 +12,42 @@ import {
 import { Brush } from "lucide-react";
 
 export default function Footer({ links }) {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    try {
+      setSubmitting(true);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Newsletter Subscriber",
+          email: email,
+          projectType: "Newsletter",
+          message: "Subscribed to newsletter from footer.",
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Subscribed successfully!");
+        setEmail("");
+      } else {
+        toast.error(data.error || "Subscription failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Projects", href: "/projects" },
@@ -171,17 +211,25 @@ export default function Footer({ links }) {
               Newsletter
             </p>
 
-            <div className="flex">
+            <form onSubmit={handleSubscribe} className="flex">
               <input
                 type="email"
                 placeholder="Your email"
-                className="flex-1 min-w-0 bg-white/5 border border-white/15 text-[#e8e3da] text-[14px] px-4 py-3 placeholder:text-white/25 focus:outline-none focus:border-white/40"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={submitting}
+                className="flex-1 min-w-0 bg-white/5 border border-white/15 text-[#e8e3da] text-[14px] px-4 py-3 placeholder:text-white/25 focus:outline-none focus:border-white/40 disabled:opacity-50"
               />
 
-              <button className="bg-[#e8e3da] text-[#0f0e0c] text-[12px] tracking-[0.15em] uppercase px-5 py-3 font-medium hover:bg-white transition">
-                Join
+              <button
+                type="submit"
+                disabled={submitting}
+                className="bg-[#e8e3da] text-[#0f0e0c] text-[12px] tracking-[0.15em] uppercase px-5 py-3 font-medium hover:bg-white transition disabled:opacity-50"
+              >
+                {submitting ? "..." : "Join"}
               </button>
-            </div>
+            </form>
           </div>
         </div>
 
